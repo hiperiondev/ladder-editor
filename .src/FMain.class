@@ -26,20 +26,6 @@ Public Sub Form_Open()
     fieldMenu.Tag = b
   Next
   
-  PBoxItem = New PictureBox(FMain) As "ElementItem"
-  With PBoxItem
-    .X = 175
-    .Y = 7
-    .Alignment = 3
-    .Height = 50
-    .Width = 50
-    .Raise
-    .Visible = True
-    .Tag = "new"
-    .Show
-    .Picture = Picture["img/no-symbol_48.png"]
-  End With
-  
   Element_counter = 0
   Element_scr_counter = 0
   Label1.text = Str$(Element_scr_counter) & " / " & Str$(Element_counter)
@@ -55,10 +41,20 @@ Public Sub Form_Open()
   FMain.Height = Panel1.Height + 140
   FMain.Width = Panel1.Width + 100
   
-  Grid_Size = 10
+  Grid_Size = 17
   Drag.icon = Picture["drop.png"]
   
   Panel1.Raise
+  
+  PBoxItem = New PictureBox(FMain) As "ElementItem"
+  With PBoxItem
+    .X = 175
+    .Y = 7
+    .Height = 51
+    .Width = 51
+    .Tag = "new"
+    .Picture = Graphic_Element(ClassElement.IxNO, "", 1).Picture
+  End With
   
 End
 
@@ -163,7 +159,7 @@ Public Sub MenuItemDelete_Click()
 End
 
 Public Sub Elements_Pack()
-
+  
   Dim Elements_new As New ClassElement[]
   Dim Element_counter_new As Integer = -1
   
@@ -186,5 +182,85 @@ Public Sub Elements_Pack()
     ErrorForm.HasFocus = True
     ErrorForm.Raise
   Endif
+  
+End
+
+Public Sub Graphic_Element(gType As Integer, gtext As String, len As Integer) As Image
+  
+  Dim graph As New Image(51, 51)
+  
+  graph.Fill(Color.Transparent)
+  Paint.Begin(graph)
+  Paint.Font = Font["Arial,7"]
+  Select gType
+    Case ClassElement.IxNO
+      Paint.moveto(0, 26)
+      Paint.LineTo(16, 26)
+      Paint.moveto(32, 26)
+      Paint.LineTo(51, 26)
+      Paint.moveto(17, 15)
+      Paint.LineTo(17, 35)
+      Paint.moveto(32, 15)
+      Paint.LineTo(32, 35)
+    Case ClassElement.IxNC
+      Paint.moveto(0, 26)
+      Paint.LineTo(16, 26)
+      Paint.moveto(32, 26)
+      Paint.LineTo(51, 26)
+      Paint.moveto(17, 15)
+      Paint.LineTo(17, 35)
+      Paint.moveto(32, 15)
+      Paint.LineTo(32, 35)
+      Paint.MoveTo(28, 15)
+      Paint.LineTo(21, 35)
+    Case ClassElement.QxNC
+      Paint.moveto(0, 26)
+      Paint.LineTo(16, 26)
+      Paint.moveto(35, 26)
+      Paint.LineTo(51, 26)
+      Paint.moveto(16, 26)
+      Paint.MoveTo(28, 15)
+      Paint.LineTo(21, 35)
+      Paint.Arc(26, 26, 10.0, Rad(130), Rad(100), False)
+      Paint.Arc(26, 26, 10.0, Rad(310), Rad(100), False)
+    Case ClassElement.QxNO
+      Paint.moveto(0, 26)
+      Paint.LineTo(16, 26)
+      Paint.moveto(35, 26)
+      Paint.LineTo(51, 26)
+      Paint.moveto(16, 26)
+      Paint.Arc(26, 26, 10.0, Rad(130), Rad(100), False)
+      Paint.Arc(26, 26, 10.0, Rad(310), Rad(100), False)
+    Case ClassElement.QxSC
+      Paint.RichText("S", 0, 0, 51, 51, 3)
+      Paint.moveto(0, 26)
+      Paint.LineTo(16, 26)
+      Paint.moveto(35, 26)
+      Paint.LineTo(51, 26)
+      Paint.moveto(16, 26)
+      Paint.Arc(26, 26, 10.0, Rad(130), Rad(100), False)
+      Paint.Arc(26, 26, 10.0, Rad(310), Rad(100), False)
+    Case ClassElement.QxRC
+      Paint.RichText("R", 0, 0, 51, 51, 3)
+      Paint.moveto(0, 26)
+      Paint.LineTo(16, 26)
+      Paint.moveto(35, 26)
+      Paint.LineTo(51, 26)
+      Paint.moveto(16, 26)
+      Paint.Arc(26, 26, 10.0, Rad(130), Rad(100), False)
+      Paint.Arc(26, 26, 10.0, Rad(310), Rad(100), False)
+    Case ClassElement.gFunc
+      Paint.RichText(gtext, 0, 0, 51, 51, 3)
+      Paint.rectangle(10, 10, 31, 31, 8)
+      Paint.moveto(0, 26)
+      Paint.LineTo(10, 26)
+      Paint.moveto(41, 26)
+      Paint.LineTo(51, 26)
+  End Select
+  
+  Paint.Stroke
+  Paint.End 
+  
+  Return graph
   
 End
