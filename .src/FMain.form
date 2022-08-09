@@ -1,28 +1,56 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,185,110)
+  MoveScaled(0,0,73,49)
+  { MenuFile Menu
+    Text = ("File")
+    { Load Menu
+      Text = ("Load")
+      Picture = Picture["icon:/32/open"]
+    }
+    { Save Menu
+      Text = ("Save")
+      Picture = Picture["icon:/32/save"]
+    }
+    { MenuProperties Menu
+      Text = ("Properties")
+      Picture = Picture["icon:/32/properties"]
+    }
+  }
+  { MenuCompile Menu
+    Text = ("Compile")
+    { xml Menu
+      Text = ("Export XML")
+      Picture = Picture["icon:/32/xml"]
+    }
+    { text Menu
+      Text = ("Export TEXT")
+      Picture = Picture["icon:/32/csv"]
+    }
+  }
   { MenuItem Menu
     Text = ("MenuItem")
     Visible = False
     { MenuItemDelete Menu
       Text = ("Delete")
+      Picture = Picture["icon:/32/delete"]
     }
     { MenuItem_Properties Menu
       Text = ("Properties")
+      Picture = Picture["icon:/32/properties"]
     }
   }
   { MenuButton1 MenuButton
-    MoveScaled(8,3,17,4)
+    MoveScaled(7.1429,3,17,4)
   }
   { Panel1 Panel
-    MoveScaled(8,9,168,81)
+    MoveScaled(7.1429,9,49,20)
     Background = Color.Transparent
     { DrawingArea1 DrawingArea
-      MoveScaled(0,0,168,82)
+      MoveScaled(0,0,49,20)
     }
   }
   { Label1 Label
-    MoveScaled(9,1,16,2)
+    MoveScaled(7.1429,1,16,2)
   }
 }
