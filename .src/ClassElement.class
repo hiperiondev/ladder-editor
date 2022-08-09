@@ -24,7 +24,9 @@ Private Function X_Read() As Integer
 End
 
 Private Sub X_Write(Value As Integer)
+
   eX = Value
+
 End
 
 Private Function Y_Read() As Integer
@@ -34,7 +36,9 @@ Private Function Y_Read() As Integer
 End
 
 Private Sub Y_Write(Value As Integer)
+
   eY = Value
+
 End
 
 Private Function connectLeft_Read() As Integer[]
@@ -44,7 +48,9 @@ Private Function connectLeft_Read() As Integer[]
 End
 
 Private Sub connectLeft_Write(Value As Integer[])
+
   eConnectLeft = Value
+
 End
 
 Private Function connectRight_Read() As Integer[]
@@ -54,7 +60,9 @@ Private Function connectRight_Read() As Integer[]
 End
 
 Private Sub connectRight_Write(Value As Integer[])
-  
+
+  eConnectRight = Value
+
 End
 
 Private Function rows_Read() As Integer
@@ -64,7 +72,9 @@ Private Function rows_Read() As Integer
 End
 
 Private Sub rows_Write(Value As Integer)
+
   eRows = Value
+
 End
 
 Private Function eType_Read() As Integer
@@ -74,17 +84,19 @@ Private Function eType_Read() As Integer
 End
 
 Private Sub eType_Write(Value As Integer)
+
   _eType = Value
+
 End
 
 Private Function PBox_Read() As Object
-
+  
   Return ePBox
-
+  
 End
 
 Private Sub PBox_Write(Value As Object)
-
+  
   ePBox = value
-
+  
 End
