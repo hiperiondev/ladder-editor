@@ -1,0 +1,145 @@
+' Gambas class file
+
+Public Grid_Size As Integer = 1
+Public Elements As New ClassElement[]
+Public fieldMenu As Menu
+Public mn As Menu
+Public textMenu As String[] = ["nc", "no", "output-coil", "reset-coil", "set-coil", "adder", "counter-down", "counter-up", "division", "equal-to", "greater-than-or-equal-to", "less-than-or-equal-to", "multiplication", "one-shot", "subtractor", "timer-delay-off", "timer-delay-on", "PID-controller"]
+Public Element_counter As Integer = 0
+Public PBoxItem As PictureBox
+Public item As Integer
+Public iconsMenu As String[] = ["img/nc-ladder-symbol_48.png", "img/no-symbol_48.png", "img/output-coil-symbol_48.png", "img/reset-coil-symbol_48.png", "img/set-coil-symbol_48.png", "img/adder_48.png", "img/counter-down_48.png", "img/counter-up_48.png", "img/division_48.png", "img/equal-to_48.png", "img/greater-than-or-equal-to_48.png", "img/less-than-or-equal-to_48.png", "img/multiplication_48.png", "img/one-shot-symbol_48.png", "img/subtractor_48.png", "img/timer-delay-off-symbol_48.png", "img/timer-delay-on-symbol_48.png", "img/PID-controller_48.png"]
+
+Public Sub Form_Open()
+  
+  MenuButton1.Menu = "Menu"
+  MenuButton1.Text = "Menu"
+  mn = New Menu(Me) As "Menu"
+  For b As Integer = 0 To textMenu.Max
+    fieldMenu = New Menu(mn) As "Field"
+    fieldMenu.Text = textMenu[CStr(b)]
+    fieldMenu.Picture = Picture[iconsMenu[CStr(b)]]
+    fieldMenu.Tag = b
+  Next
+  
+  PBoxItem = New PictureBox(FMain) As "ElementItem"
+  With PBoxItem
+    .X = 175
+    .Y = 7
+    .Alignment = 3
+    .Height = 50
+    .Width = 50
+    .Raise
+    .Visible = True
+    .Tag = "new"
+    .Show
+  End With
+  
+  Element_counter = 0
+  
+  Panel1.Drop = True
+  Panel1.Height = 640
+  Panel1.Width = 1200
+  Panel1.Border = 2
+  
+  DrawingArea1.Height = 640
+  DrawingArea1.Width = 1200
+  
+  Grid_Size = 10
+  Drag.icon = Picture["drop.png"]
+  
+  Panel1.Raise
+  
+End
+
+Public Sub Field_Click()
+  
+  PBoxItem.Picture = Last.Picture
+  
+End
+
+Public Sub Panel1_DragMove()
+  
+  Drag.Source.Raise
+  Drag.Show(Drag.Source)
+  
+End
+
+Public Sub Panel1_Drop()
+  
+  Dim dX As Integer = Int((Round((Drag.X + Panel1.X) / Grid_Size)) * Grid_Size)
+  Dim dY As Integer = Int((Round((Drag.Y + Panel1.Y) / Grid_Size)) * Grid_Size)
+  
+  Drag.Source.X = dX
+  Drag.Source.Y = dY
+  
+  If Drag.Source.Tag = "new" Then
+    Dim pb As PictureBox = PBoxItem
+    
+    PBoxItem = New PictureBox(FMain) As "ElementItem"
+    With PBoxItem
+      .X = 175
+      .Y = 7
+      .Alignment = 3
+      .Height = 50
+      .Width = 50
+      .Raise
+      .Visible = True
+      .Tag = "new"
+      .Picture = pb.Picture
+      .Show
+    End With
+    
+    Dim Element As New ClassElement
+    Element.X = dX
+    Element.Y = dY
+    Element.Rows = 1
+    Element.eType = Element.IxNO
+    Element.PBox = pb
+    Element.PBox.Tag = Str$(Element_counter)
+    
+    Elements.Add(Element)
+    Element_counter = Element_counter + 1
+    
+  Endif
+  
+End
+
+Public Sub DrawingArea1_Draw()
+  
+  For x As Integer = 4 To DrawingArea1.Width - 4 Step Grid_Size
+    For y As Integer = 4 To DrawingArea1.Height - 4 Step Grid_Size
+      Paint.Begin(DrawingArea1)
+      With Paint
+        .Brush = Paint.Color(Color.gray)
+        .Arc(x, y, 1.0, Rad(0), Rad(360), False)
+        .Fill
+        .End
+      End With 
+      Paint.end
+    Next
+  Next
+  
+End
+
+Public Sub ElementItem_MouseDown()
+  
+  If Mouse.Right = True And Last.Tag <> "new" Then
+    item = Val(Last.Tag)
+    MenuItem.Popup()
+  Endif
+  
+End
+
+Public Sub ElementItem_MouseDrag()
+  
+  Last.Drag(Last.Tag)
+  
+End
+
+Public Sub MenuItemDelete_Click()
+  
+  Elements[item].PBox.Delete
+  Elements[item] = Null
+  
+End

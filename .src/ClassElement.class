@@ -1,0 +1,90 @@
+' Gambas class file
+
+Property eType As Integer
+Private _eType As Integer
+Property X As Integer
+Private eX As Integer
+Property Y As Integer
+Private eY As Integer
+Property Rows As Integer
+Private eRows As Integer
+Property ConnectLeft As Integer[]
+Private eConnectLeft As Integer[]
+Property ConnectRight As Integer[]
+Private eConnectRight As Integer[]
+Property PBox As Object
+Private ePBox As Object
+
+Public Enum IxNO, IxNC, QxNO, QxNC
+
+Private Function X_Read() As Integer
+  
+  Return eX
+  
+End
+
+Private Sub X_Write(Value As Integer)
+  eX = Value
+End
+
+Private Function Y_Read() As Integer
+  
+  Return eY
+  
+End
+
+Private Sub Y_Write(Value As Integer)
+  eY = Value
+End
+
+Private Function connectLeft_Read() As Integer[]
+  
+  Return eConnectLeft
+  
+End
+
+Private Sub connectLeft_Write(Value As Integer[])
+  eConnectLeft = Value
+End
+
+Private Function connectRight_Read() As Integer[]
+  
+  Return eConnectRight
+  
+End
+
+Private Sub connectRight_Write(Value As Integer[])
+  
+End
+
+Private Function rows_Read() As Integer
+  
+  Return eRows
+  
+End
+
+Private Sub rows_Write(Value As Integer)
+  eRows = Value
+End
+
+Private Function eType_Read() As Integer
+  
+  Return _eType
+  
+End
+
+Private Sub eType_Write(Value As Integer)
+  _eType = Value
+End
+
+Private Function PBox_Read() As Object
+
+  Return ePBox
+
+End
+
+Private Sub PBox_Write(Value As Object)
+
+  ePBox = value
+
+End

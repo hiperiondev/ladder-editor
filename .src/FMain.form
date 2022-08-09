@@ -1,0 +1,25 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,185,110)
+  { MenuItem Menu
+    Text = ("MenuItem")
+    Visible = False
+    { MenuItemDelete Menu
+      Text = ("Delete")
+    }
+    { MenuItem_Properties Menu
+      Text = ("Properties")
+    }
+  }
+  { MenuButton1 MenuButton
+    MoveScaled(8,3,17,4)
+  }
+  { Panel1 Panel
+    MoveScaled(8,9,168,81)
+    Background = Color.Transparent
+    { DrawingArea1 DrawingArea
+      MoveScaled(0,0,168,82)
+    }
+  }
+}
