@@ -4,17 +4,21 @@ Public Grid_Size As Integer = 1
 Public Elements As New ClassElement[]
 Public fieldMenu As Menu
 Public mn As Menu
-Public textMenu As String[] = ["nc", "no", "output-coil", "reset-coil", "set-coil", "adder", "counter-down", "counter-up", "division", "equal-to", "greater-than-or-equal-to", "less-than-or-equal-to", "multiplication", "one-shot", "subtractor", "timer-delay-off", "timer-delay-on", "PID-controller"]
 Public Element_counter As Integer = 0
+Public Element_scr_counter As Integer = 0
 Public PBoxItem As PictureBox
 Public item As Integer
+
+Public textMenu As String[] = ["nc", "no", "output-coil", "reset-coil", "set-coil", "adder", "counter-down", "counter-up", "division", "equal-to", "greater-than-or-equal-to", "less-than-or-equal-to", "multiplication", "one-shot", "subtractor", "timer-delay-off", "timer-delay-on", "PID-controller"]
 Public iconsMenu As String[] = ["img/nc-ladder-symbol_48.png", "img/no-symbol_48.png", "img/output-coil-symbol_48.png", "img/reset-coil-symbol_48.png", "img/set-coil-symbol_48.png", "img/adder_48.png", "img/counter-down_48.png", "img/counter-up_48.png", "img/division_48.png", "img/equal-to_48.png", "img/greater-than-or-equal-to_48.png", "img/less-than-or-equal-to_48.png", "img/multiplication_48.png", "img/one-shot-symbol_48.png", "img/subtractor_48.png", "img/timer-delay-off-symbol_48.png", "img/timer-delay-on-symbol_48.png", "img/PID-controller_48.png"]
 
 Public Sub Form_Open()
   
-  MenuButton1.Menu = "Menu"
-  MenuButton1.Text = "Menu"
-  mn = New Menu(Me) As "Menu"
+  FMain.Name = "Ladder Editor"
+  MenuButton1.Menu = "Ladder"
+  MenuButton1.Text = "Ladder"
+  
+  mn = New Menu(Me) As "Ladder"
   For b As Integer = 0 To textMenu.Max
     fieldMenu = New Menu(mn) As "Field"
     fieldMenu.Text = textMenu[CStr(b)]
@@ -36,6 +40,8 @@ Public Sub Form_Open()
   End With
   
   Element_counter = 0
+  Element_scr_counter = 0
+  Label1.text = Str$(Element_scr_counter) & " / " & Str$(Element_counter)
   
   Panel1.Drop = True
   Panel1.Height = 640
@@ -100,6 +106,12 @@ Public Sub Panel1_Drop()
     
     Elements.Add(Element)
     Element_counter = Element_counter + 1
+    Element_scr_counter = Element_scr_counter + 1
+    Label1.text = Str$(Element_scr_counter) & " / " & Str$(Element_counter)
+    
+    If Element_counter > 2147483640 Then
+      Elements_Pack()
+    Endif
     
   Endif
   
@@ -141,5 +153,34 @@ Public Sub MenuItemDelete_Click()
   
   Elements[item].PBox.Delete
   Elements[item] = Null
+  Element_scr_counter = Element_scr_counter - 1
+  Label1.text = Str$(Element_scr_counter) & " / " & Str$(Element_counter)
+  
+End
+
+Public Sub Elements_Pack()
+
+  Dim Elements_new As New ClassElement[]
+  Dim Element_counter_new As Integer = -1
+  
+  For e As Integer = 0 To Element_counter
+    If Elements[e] <> Null Then
+      Elements_new.Add(Elements[e])
+      Element_counter_new = Element_counter_new + 1
+      Elements_new[Element_counter_new].PBox.Tag = Str$(Element_counter_new)
+    Endif
+  Next
+  
+  Elements = Elements_new
+  Element_counter = Element_counter_new
+  Element_scr_counter = Element_counter
+  Label1.text = Str$(Element_scr_counter) & " / " & Str$(Element_counter)
+  
+  If Element_counter > 2147483639 Then
+    ErrorForm.Activate
+    ErrorForm.Enabled = True
+    ErrorForm.HasFocus = True
+    ErrorForm.Raise
+  Endif
   
 End

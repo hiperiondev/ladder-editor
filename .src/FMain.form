@@ -22,4 +22,7 @@
       MoveScaled(0,0,168,82)
     }
   }
+  { Label1 Label
+    MoveScaled(9,1,16,2)
+  }
 }

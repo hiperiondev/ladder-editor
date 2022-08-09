@@ -1,9 +1,10 @@
 # Gambas Project File 3.0
-Title=test
+Title=Ladder Editor
 Startup=FMain
 Version=0.0.1
 Component=gb.image
 Component=gb.gui.qt
 Component=gb.form
+TabSize=2
 Language=en_US
 Packager=1
