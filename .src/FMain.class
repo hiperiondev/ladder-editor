@@ -8,6 +8,7 @@ Public Element_counter As Integer = 0
 Public Element_scr_counter As Integer = 0
 Public PBoxItem As PictureBox
 Public item As Integer
+Public LastElementClick As Object = Null
 
 Public textMenu As String[] = ["nc", "no", "output-coil", "reset-coil", "set-coil", "adder", "counter-down", "counter-up", "division", "equal-to", "greater-than-or-equal-to", "less-than-or-equal-to", "multiplication", "one-shot", "subtractor", "timer-delay-off", "timer-delay-on", "PID-controller"]
 Public ElementGraphic As New Picture[]
@@ -88,7 +89,7 @@ Public Sub Form_Open()
   Drag.icon = PBoxItem.Picture
   Drag.IconX = 26
   Drag.IconY = 26
-
+  
 End
 
 Public Sub Field_Click()
@@ -113,6 +114,14 @@ Public Sub Panel1_Drop()
   
   Drag.Source.X = dX
   Drag.Source.Y = dY
+  
+  If LastElementClick <> Null Then
+    LastElementClick.border = False
+    LastElementClick.Background = Color.Transparent
+  Endif
+  LastElementClick = Drag.Source
+  LastElementClick.border = True
+  LastElementClick.Background = Color.RGB(255, 214, 153, 80)
   
   If Drag.Source.Tag = "new" Then
     Dim pb As PictureBox = PBoxItem
@@ -152,6 +161,15 @@ Public Sub Panel1_Drop()
   
 End
 
+Public Sub Form_KeyPress()
+  
+  If (Key.Code = Key.Up) Then LastElementClick.Y = LastElementClick.Y - Grid_Size
+  If (Key.Code = Key.Down) Then LastElementClick.Y = LastElementClick.Y + Grid_Size
+  If (Key.Code = Key.Left) Then LastElementClick.X = LastElementClick.X - Grid_Size
+  If (Key.Code = Key.Right) Then LastElementClick.X = LastElementClick.X + Grid_Size
+  
+End
+
 Public Sub DrawingArea1_Draw()
   
   For x As Integer = 25 To DrawingArea1.Width - 25 Step Grid_Size
@@ -171,21 +189,33 @@ End
 
 Public Sub ElementItem_MouseDown()
   
+  Dim p As PictureBox
+  
   If Mouse.Right = True And Last.Tag <> "new" Then
     item = Val(Last.Tag)
     MenuItem.Popup()
   Endif
   
+  If Mouse.Left = True And Last.Tag <> "new" Then
+    If LastElementClick <> Null Then
+      LastElementClick.border = False
+      LastElementClick.Background = Color.Transparent
+    Endif
+    LastElementClick = Last
+    LastElementClick.border = True
+    LastElementClick.Background = Color.RGB(255, 214, 153, 80)
+  Endif
+  
 End
 
 Public Sub ElementItem_MouseDrag()
-
+  
   Last.Drag(Last.Tag)
   Drag.icon = Last.Picture
-
+  
 End
 
-Public Sub MenuItemDelete_Click()
+Public Sub MenuItemDelete_MouseClick()
   
   Elements[item].PBox.Delete
   Elements[item] = Null
@@ -224,7 +254,7 @@ End
 Public Sub Graphic_Element(gType As Integer, gName As String, gPins As String[]) As Image
   
   Dim graph As Image
-
+  
   If gpins = Null
     graph = New Image(51, 51)
   Else 
