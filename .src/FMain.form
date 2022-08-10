@@ -41,16 +41,16 @@
     }
   }
   { MenuButton1 MenuButton
-    MoveScaled(7.1429,3,17,4)
+    MoveScaled(1,3,10,4)
   }
   { Panel1 Panel
-    MoveScaled(7.1429,9,49,20)
+    MoveScaled(11,9,49,20)
     Background = Color.Transparent
     { DrawingArea1 DrawingArea
       MoveScaled(0,0,49,20)
     }
   }
   { Label1 Label
-    MoveScaled(7.1429,1,16,2)
+    MoveScaled(1,1,16,2)
   }
 }
