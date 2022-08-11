@@ -28,8 +28,8 @@
       Picture = Picture["icon:/32/csv"]
     }
   }
-  { MenuItem Menu
-    Text = ("MenuItem")
+  { MenuPopUPItem Menu
+    Text = ("MenuPopUPItem")
     Visible = False
     { MenuItemDelete Menu
       Text = ("Delete")

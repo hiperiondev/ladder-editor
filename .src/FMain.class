@@ -9,8 +9,12 @@ Public Element_scr_counter As Integer = 0
 Public PBoxItem As PictureBox
 Public item As Integer
 Public LastElementClick As Object = Null
+Public minX As Integer
+Public maxX As Integer
+Public minY As Integer
+Public maxY As Integer
 
-Public textMenu As String[] = ["nc", "no", "output-coil", "reset-coil", "set-coil", "adder", "counter-down", "counter-up", "division", "equal-to", "greater-than-or-equal-to", "less-than-or-equal-to", "multiplication", "one-shot", "subtractor", "timer-delay-off", "timer-delay-on", "PID-controller"]
+Public textMenu1 As String[] = ["nc", "no", "output-coil", "reset-coil", "set-coil", "adder", "counter-down", "counter-up", "division", "equal-to", "greater-than-or-equal-to", "less-than-or-equal-to", "multiplication", "one-shot", "subtractor", "timer-delay-off", "timer-delay-on", "PID-controller"]
 Public ElementGraphic As New Picture[]
 
 Public Sub Form_Open()
@@ -43,9 +47,9 @@ Public Sub Form_Open()
   MenuButton1.Text = "Ladder"
   
   mn = New Menu(Me) As "Ladder"
-  For b As Integer = 0 To textMenu.Max
+  For b As Integer = 0 To textMenu1.Max
     fieldMenu = New Menu(mn) As "Field"
-    fieldMenu.Text = textMenu[CStr(b)]
+    fieldMenu.Text = textMenu1[CStr(b)]
     fieldMenu.Picture = ElementGraphic[b]
     fieldMenu.Tag = b
   Next
@@ -59,8 +63,10 @@ Public Sub Form_Open()
   Panel1.Width = 1200
   Panel1.Border = 2
   
-  DrawingArea1.Height = 640
-  DrawingArea1.Width = 1200
+  DrawingArea1.Height = Panel1.Height
+  DrawingArea1.Width = Panel1.Width
+  DrawingArea1.X = 0
+  DrawingArea1.Y = 0
   
   FMain.Height = Panel1.Height + 140
   FMain.Width = Panel1.Width + 100
@@ -90,6 +96,12 @@ Public Sub Form_Open()
   Drag.IconX = 26
   Drag.IconY = 26
   
+  'max/min position of elemnt
+  minX = Panel1.X + 25 
+  maxX = Int((Round((DrawingArea1.Width - 25 + Panel1.X) / Grid_Size)) * Grid_Size) - (4 * Grid_Size)
+  minY = Panel1.Y + 14 - (26 - Grid_Size)
+  maxY = Int((Round((DrawingArea1.Height - 14 + Panel1.X) / Grid_Size)) * Grid_Size) - (3 * Grid_Size)
+  
 End
 
 Public Sub Field_Click()
@@ -115,10 +127,12 @@ Public Sub Panel1_Drop()
   Drag.Source.X = dX
   Drag.Source.Y = dY
   
-  If LastElementClick <> Null Then
+  Try LastElementClick.Tag = LastElementClick.Tag
+  If Not Error Then
     LastElementClick.border = False
     LastElementClick.Background = Color.Transparent
   Endif
+  
   LastElementClick = Drag.Source
   LastElementClick.border = True
   LastElementClick.Background = Color.RGB(255, 214, 153, 80)
@@ -162,7 +176,8 @@ Public Sub Panel1_Drop()
 End
 
 Public Sub Form_KeyPress()
-  
+  'missing limits!
+
   If (Key.Code = Key.Up) Then LastElementClick.Y = LastElementClick.Y - Grid_Size
   If (Key.Code = Key.Down) Then LastElementClick.Y = LastElementClick.Y + Grid_Size
   If (Key.Code = Key.Left) Then LastElementClick.X = LastElementClick.X - Grid_Size
@@ -189,21 +204,31 @@ End
 
 Public Sub ElementItem_MouseDown()
   
-  Dim p As PictureBox
+  If Last.Tag <> "new" Then
+    item = Val(Last.Tag)
+  Endif 
   
   If Mouse.Right = True And Last.Tag <> "new" Then
-    item = Val(Last.Tag)
-    MenuItem.Popup()
+    MenuPopUPItem.Popup()
   Endif
   
-  If Mouse.Left = True And Last.Tag <> "new" Then
-    If LastElementClick <> Null Then
-      LastElementClick.border = False
-      LastElementClick.Background = Color.Transparent
-    Endif
+  Try Last.Tag = Last.Tag
+  If Error Then
+    Return
+  Endif
+  
+  If Last.Tag <> "new" And Mouse.Left = True Then
+    Try LastElementClick.Tag = LastElementClick.Tag
+    If Not Error Then
+      If LastElementClick <> Null Then
+        LastElementClick.border = False
+        LastElementClick.Background = Color.Transparent
+      Endif
+    Endif 
     LastElementClick = Last
     LastElementClick.border = True
     LastElementClick.Background = Color.RGB(255, 214, 153, 80)
+    Print item
   Endif
   
 End
@@ -211,12 +236,14 @@ End
 Public Sub ElementItem_MouseDrag()
   
   Last.Drag(Last.Tag)
-  Drag.icon = Last.Picture
+  Drag.icon = Last.Picture 
   
 End
 
-Public Sub MenuItemDelete_MouseClick()
+Public Sub MenuItemDelete_Click()
   
+  Print item
+  Print Elements[item].PBox.tag
   Elements[item].PBox.Delete
   Elements[item] = Null
   Element_scr_counter = Element_scr_counter - 1
