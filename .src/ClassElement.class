@@ -15,7 +15,7 @@ Private eConnectRight As Integer[]
 Property PBox As Object
 Private ePBox As Object
 
-Public Enum IxNO, IxNC, QxNO, QxNC, QxSC, QxRC, fADD, fCNTdw, fCNTup, fDIV, fEQ, fGT, fLT, fMUL, fOSHT, fSUB, fTMRoff, fTMRon, fPID, fgFUNC, fgFUNCs, gQx
+Public Enum IxNO, IxNC, QxNO, QxNC, QxSC, QxRC, QxP, fADD, fCNTdw, fCNTup, fDIV, fEQ, fGT, fLT, fMUL, fOSHT, fSUB, fTMRoff, fTMRon, fPID, fgFUNC, fgFUNCs, gQx
 
 Private Function X_Read() As Integer
   

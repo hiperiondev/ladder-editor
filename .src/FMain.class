@@ -15,6 +15,8 @@ Public minY As Integer
 Public maxY As Integer
 
 Public textMenu1 As String[] = ["nc", "no", "output-coil", "reset-coil", "set-coil", "adder", "counter-down", "counter-up", "division", "equal-to", "greater-than-or-equal-to", "less-than-or-equal-to", "multiplication", "one-shot", "subtractor", "timer-delay-off", "timer-delay-on", "PID-controller"]
+Public typeMenu1 As New Integer[]
+Public rowsMenu1 As New Integer[]
 Public ElementGraphic As New Picture[]
 
 Public Sub Form_Open()
@@ -24,23 +26,59 @@ Public Sub Form_Open()
   MenuButton1.Text = "Ladder"
   
   ElementGraphic.Add(Graphic_Element(ClassElement.IxNC, "", Null).Picture)
+  typeMenu1.Add(ClassElement.IxNC)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.IxNO, "", Null).Picture)
+  typeMenu1.Add(ClassElement.IxNO)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.QxNO, "", Null).Picture)
+  typeMenu1.Add(ClassElement.QxNO)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.gQx, "R", Null).Picture)
+  typeMenu1.Add(ClassElement.QxRC)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.gQx, "S", Null).Picture)
+  typeMenu1.Add(ClassElement.QxSC)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "ADD", Null).Picture)
+  typeMenu1.Add(ClassElement.fADD)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "CTD", Null).Picture)
+  typeMenu1.Add(ClassElement.fCNTdw)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "CTU", Null).Picture)
+  typeMenu1.Add(ClassElement.fCNTup)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "DIV", Null).Picture)
+  typeMenu1.Add(ClassElement.fDIV)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "=", Null).Picture)
+  typeMenu1.Add(ClassElement.fEQ)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, ">=", Null).Picture)
+  typeMenu1.Add(ClassElement.fGT)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "<=", Null).Picture)
+  typeMenu1.Add(ClassElement.fLT)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "MUL", Null).Picture)
+  typeMenu1.Add(ClassElement.fMUL)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.gQx, "P", Null).Picture)
+  typeMenu1.Add(ClassElement.QxP)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "SUB", Null).Picture)
+  typeMenu1.Add(ClassElement.fSUB)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "TOF", Null).Picture)
+  typeMenu1.Add(ClassElement.fTMRoff)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "TON", Null).Picture)
+  typeMenu1.Add(ClassElement.fTMRon)
+  rowsMenu1.Add(1)
   ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "PID", Null).Picture)
+  typeMenu1.Add(ClassElement.fPID)
+  rowsMenu1.Add(1)
   
   FMain.Name = "Ladder Editor"
   MenuButton1.Menu = "Ladder"
@@ -89,7 +127,7 @@ Public Sub Form_Open()
     .Picture = Graphic_Element(ClassElement.IxNO, "", Null).Picture
     .Height = .Picture.Height
     .Width = 51
-    .Tag = "new"
+    .Tag = "new+" & Str$(ClassElement.IxNO)
   End With
   
   Drag.icon = PBoxItem.Picture
@@ -108,6 +146,7 @@ Public Sub Field_Click()
   
   PBoxItem.Picture = Last.Picture
   PBoxItem.Height = PBoxItem.Picture.Height
+  PBoxItem.Tag = "new+" & Str$(typeMenu1[Last.tag])
   Drag.icon = PBoxItem.Picture
   
 End
@@ -137,7 +176,7 @@ Public Sub Panel1_Drop()
   LastElementClick.border = True
   LastElementClick.Background = Color.RGB(255, 214, 153, 80)
   
-  If Drag.Source.Tag = "new" Then
+  If Mid(Drag.Source.Tag, 1, 3) = "new" Then
     Dim pb As PictureBox = PBoxItem
     
     PBoxItem = New PictureBox(FMain) As "ElementItem"
@@ -150,15 +189,15 @@ Public Sub Panel1_Drop()
       .Width = 50
       .Raise
       .Visible = True
-      .Tag = "new"
+      .Tag = pb.tag
       .Show
     End With
     
     Dim Element As New ClassElement
     Element.X = dX
     Element.Y = dY
-    Element.Rows = 1
-    Element.eType = Element.IxNO
+    Element.eType = Val(Mid(pb.Tag, 5))
+    Element.Rows = rowsMenu1[Element.eType]
     Element.PBox = pb
     Element.PBox.Tag = Str$(Element_counter)
     
@@ -177,7 +216,7 @@ End
 
 Public Sub Form_KeyPress()
   'missing limits!
-
+  
   If (Key.Code = Key.Up) Then LastElementClick.Y = LastElementClick.Y - Grid_Size
   If (Key.Code = Key.Down) Then LastElementClick.Y = LastElementClick.Y + Grid_Size
   If (Key.Code = Key.Left) Then LastElementClick.X = LastElementClick.X - Grid_Size
@@ -204,11 +243,11 @@ End
 
 Public Sub ElementItem_MouseDown()
   
-  If Last.Tag <> "new" Then
+  If Mid(Last.Tag, 1, 3) <> "new" Then
     item = Val(Last.Tag)
   Endif 
   
-  If Mouse.Right = True And Last.Tag <> "new" Then
+  If Mouse.Right = True And Mid(Last.Tag, 1, 3) <> "new" Then
     MenuPopUPItem.Popup()
   Endif
   
@@ -217,7 +256,7 @@ Public Sub ElementItem_MouseDown()
     Return
   Endif
   
-  If Last.Tag <> "new" And Mouse.Left = True Then
+  If Mid(Last.Tag, 1, 3) <> "new" And Mouse.Left = True Then
     Try LastElementClick.Tag = LastElementClick.Tag
     If Not Error Then
       If LastElementClick <> Null Then
@@ -228,7 +267,6 @@ Public Sub ElementItem_MouseDown()
     LastElementClick = Last
     LastElementClick.border = True
     LastElementClick.Background = Color.RGB(255, 214, 153, 80)
-    Print item
   Endif
   
 End
@@ -242,8 +280,6 @@ End
 
 Public Sub MenuItemDelete_Click()
   
-  Print item
-  Print Elements[item].PBox.tag
   Elements[item].PBox.Delete
   Elements[item] = Null
   Element_scr_counter = Element_scr_counter - 1
