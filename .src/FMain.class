@@ -16,7 +16,7 @@ Public maxY As Integer
 
 Public textMenu1 As String[] = ["nc", "no", "output-coil", "reset-coil", "set-coil", "adder", "counter-down", "counter-up", "division", "equal-to", "greater-than-or-equal-to", "less-than-or-equal-to", "multiplication", "one-shot", "subtractor", "timer-delay-off", "timer-delay-on", "PID-controller"]
 Public typeMenu1 As New Integer[]
-Public rowsMenu1 As New Integer[]
+Public rowsElement As New Integer[]
 Public ElementGraphic As New Picture[]
 
 Public Sub Form_Open()
@@ -25,64 +25,12 @@ Public Sub Form_Open()
   MenuButton1.Menu = "Ladder"
   MenuButton1.Text = "Ladder"
   
-  ElementGraphic.Add(Graphic_Element(ClassElement.IxNC, "", Null).Picture)
-  typeMenu1.Add(ClassElement.IxNC)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.IxNO, "", Null).Picture)
-  typeMenu1.Add(ClassElement.IxNO)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.QxNO, "", Null).Picture)
-  typeMenu1.Add(ClassElement.QxNO)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.gQx, "R", Null).Picture)
-  typeMenu1.Add(ClassElement.QxRC)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.gQx, "S", Null).Picture)
-  typeMenu1.Add(ClassElement.QxSC)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "ADD", Null).Picture)
-  typeMenu1.Add(ClassElement.fADD)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "CTD", Null).Picture)
-  typeMenu1.Add(ClassElement.fCNTdw)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "CTU", Null).Picture)
-  typeMenu1.Add(ClassElement.fCNTup)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "DIV", Null).Picture)
-  typeMenu1.Add(ClassElement.fDIV)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "=", Null).Picture)
-  typeMenu1.Add(ClassElement.fEQ)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, ">=", Null).Picture)
-  typeMenu1.Add(ClassElement.fGT)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "<=", Null).Picture)
-  typeMenu1.Add(ClassElement.fLT)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "MUL", Null).Picture)
-  typeMenu1.Add(ClassElement.fMUL)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.gQx, "P", Null).Picture)
-  typeMenu1.Add(ClassElement.QxP)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "SUB", Null).Picture)
-  typeMenu1.Add(ClassElement.fSUB)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "TOF", Null).Picture)
-  typeMenu1.Add(ClassElement.fTMRoff)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "TON", Null).Picture)
-  typeMenu1.Add(ClassElement.fTMRon)
-  rowsMenu1.Add(1)
-  ElementGraphic.Add(Graphic_Element(ClassElement.fgFUNC, "PID", Null).Picture)
-  typeMenu1.Add(ClassElement.fPID)
-  rowsMenu1.Add(1)
-  
   FMain.Name = "Ladder Editor"
   MenuButton1.Menu = "Ladder"
   MenuButton1.Text = "Ladder"
+  
+  'Init elements
+  Init_Ladder.Attributes
   
   mn = New Menu(Me) As "Ladder"
   For b As Integer = 0 To textMenu1.Max
@@ -124,7 +72,7 @@ Public Sub Form_Open()
     .X = 13
     .Y = 50
     '.Picture = Graphic_Element(ClassElement.fgFUNCs, "NAME", fn).Picture
-    .Picture = Graphic_Element(ClassElement.IxNO, "", Null).Picture
+    .Picture = Graphics.Element(ClassElement.IxNO, "", Null).Picture
     .Height = .Picture.Height
     .Width = 51
     .Tag = "new+" & Str$(ClassElement.IxNO)
@@ -197,7 +145,7 @@ Public Sub Panel1_Drop()
     Element.X = dX
     Element.Y = dY
     Element.eType = Val(Mid(pb.Tag, 5))
-    Element.Rows = rowsMenu1[Element.eType]
+    Element.Rows = rowsElement[Element.eType]
     Element.PBox = pb
     Element.PBox.Tag = Str$(Element_counter)
     
@@ -207,7 +155,7 @@ Public Sub Panel1_Drop()
     Label1.text = Str$(Element_scr_counter) & " / " & Str$(Element_counter)
     
     If Element_counter > 2147483640 Then
-      Elements_Pack()
+      ClassElement.Elements_Pack()
     Endif
     
   Endif
@@ -284,138 +232,5 @@ Public Sub MenuItemDelete_Click()
   Elements[item] = Null
   Element_scr_counter = Element_scr_counter - 1
   Label1.text = Str$(Element_scr_counter) & " / " & Str$(Element_counter)
-  
-End
-
-Public Sub Elements_Pack()
-  
-  Dim Elements_new As New ClassElement[]
-  Dim Element_counter_new As Integer = -1
-  
-  For e As Integer = 0 To Element_counter
-    If Elements[e] <> Null Then
-      Elements_new.Add(Elements[e])
-      Element_counter_new = Element_counter_new + 1
-      Elements_new[Element_counter_new].PBox.Tag = Str$(Element_counter_new)
-    Endif
-  Next
-  
-  Elements = Elements_new
-  Element_counter = Element_counter_new
-  Element_scr_counter = Element_counter
-  Label1.text = Str$(Element_scr_counter) & " / " & Str$(Element_counter)
-  
-  If Element_counter > 2147483639 Then
-    ErrorForm.Activate
-    ErrorForm.Enabled = True
-    ErrorForm.HasFocus = True
-    ErrorForm.Raise
-  Endif
-  
-End
-
-Public Sub Graphic_Element(gType As Integer, gName As String, gPins As String[]) As Image
-  
-  Dim graph As Image
-  
-  If gpins = Null
-    graph = New Image(51, 51)
-  Else 
-    graph = New Image(51, 51 + (17 * gPins.Count))
-  Endif 
-  
-  graph.Fill(Color.Transparent)
-  Paint.Begin(graph)
-  Paint.Font = Font["Arial,8"]
-  Select gType
-    Case ClassElement.IxNO
-      Paint.moveto(0, 26)
-      Paint.LineTo(16, 26)
-      Paint.moveto(32, 26)
-      Paint.LineTo(51, 26)
-      Paint.moveto(17, 15)
-      Paint.LineTo(17, 35)
-      Paint.moveto(32, 15)
-      Paint.LineTo(32, 35)
-    Case ClassElement.IxNC
-      Paint.moveto(0, 26)
-      Paint.LineTo(16, 26)
-      Paint.moveto(32, 26)
-      Paint.LineTo(51, 26)
-      Paint.moveto(17, 15)
-      Paint.LineTo(17, 35)
-      Paint.moveto(32, 15)
-      Paint.LineTo(32, 35)
-      Paint.MoveTo(28, 15)
-      Paint.LineTo(21, 35)
-    Case ClassElement.QxNC
-      Paint.moveto(0, 26)
-      Paint.LineTo(16, 26)
-      Paint.moveto(35, 26)
-      Paint.LineTo(51, 26)
-      Paint.moveto(16, 26)
-      Paint.MoveTo(28, 15)
-      Paint.LineTo(21, 35)
-      Paint.Arc(26, 26, 10.0, Rad(130), Rad(100), False)
-      Paint.Arc(26, 26, 10.0, Rad(310), Rad(100), False)
-    Case ClassElement.QxNO
-      Paint.moveto(0, 26)
-      Paint.LineTo(16, 26)
-      Paint.moveto(35, 26)
-      Paint.LineTo(51, 26)
-      Paint.moveto(16, 26)
-      Paint.Arc(26, 26, 10.0, Rad(130), Rad(100), False)
-      Paint.Arc(26, 26, 10.0, Rad(310), Rad(100), False)
-    Case ClassElement.gQx
-      Paint.Text(gName, 0, 0, 51, 51, 3)
-      Paint.moveto(0, 26)
-      Paint.LineTo(16, 26)
-      Paint.moveto(35, 26)
-      Paint.LineTo(51, 26)
-      Paint.moveto(16, 26)
-      Paint.Arc(26, 26, 10.0, Rad(130), Rad(100), False)
-      Paint.Arc(26, 26, 10.0, Rad(310), Rad(100), False)
-    Case ClassElement.fgFUNC
-      Paint.Brush = Paint.Color(Color.RGB(153, 206, 255, 150))
-      Paint.rectangle(5, 17, 41, 17, 5)
-      Paint.Fill
-      Paint.Brush = Paint.Color(Color.RGB(0, 0, 0, 0))
-      Paint.rectangle(5, 17, 41, 17, 5)
-      Paint.Text(gName, 0, 0, 51, 51, 3)
-      Paint.moveto(0, 26)
-      Paint.LineTo(5, 26)
-      Paint.moveto(45, 26)
-      Paint.LineTo(51, 26)
-    Case ClassElement.fgFUNCs
-      Dim gY As Integer
-      Paint.Brush = Paint.Color(Color.RGB(153, 206, 255, 150))
-      Paint.rectangle(5, 17, 41, (51 + (17 * gPins.Max)) - 10, 5)
-      Paint.Fill
-      Paint.Brush = Paint.Color(Color.RGB(0, 0, 0, 0))
-      Paint.rectangle(5, 17, 41, (51 + (17 * gPins.Max)) - 10, 5)
-      Paint.Text(gName, 0, 0, 51, 51, 3)
-      Paint.moveto(0, 26)
-      Paint.LineTo(5, 26)
-      Paint.moveto(45, 26)
-      Paint.LineTo(51, 26)
-      For p As Integer = 0 To gPins.Max
-        gY = 43 + (17 * p)
-        If Left(gPins[p]) = "i"
-          Paint.RichText(Mid(gPins[p], 2), 0, gY - 26, 51, 51, 3)
-          Paint.moveto(0, gY)
-          Paint.LineTo(5, gY)
-        Else If Left(gPins[p]) = "o"
-          Paint.RichText(Mid(gPins[p], 2), 0, gY - 26, 51, 51, 3)
-          Paint.moveto(45, gY)
-          Paint.LineTo(51, gY)
-        End If
-      Next
-      
-  End Select
-  
-  Paint.Stroke
-  Paint.End 
-  
-  Return graph
   
 End

@@ -1,0 +1,107 @@
+' Gambas module file
+
+Public Sub Element(gType As Integer, gName As String, gPins As String[]) As Image
+  
+  Dim graph As Image
+  
+  If gpins = Null
+    graph = New Image(51, 51)
+  Else 
+    graph = New Image(51, 51 + (17 * gPins.Count))
+  Endif 
+  
+  graph.Fill(Color.Transparent)
+  Paint.Begin(graph)
+  Paint.Font = Font["Arial,8"]
+  Select gType
+    Case ClassElement.IxNO
+      Paint.moveto(0, 26)
+      Paint.LineTo(16, 26)
+      Paint.moveto(32, 26)
+      Paint.LineTo(51, 26)
+      Paint.moveto(17, 15)
+      Paint.LineTo(17, 35)
+      Paint.moveto(32, 15)
+      Paint.LineTo(32, 35)
+    Case ClassElement.IxNC
+      Paint.moveto(0, 26)
+      Paint.LineTo(16, 26)
+      Paint.moveto(32, 26)
+      Paint.LineTo(51, 26)
+      Paint.moveto(17, 15)
+      Paint.LineTo(17, 35)
+      Paint.moveto(32, 15)
+      Paint.LineTo(32, 35)
+      Paint.MoveTo(28, 15)
+      Paint.LineTo(21, 35)
+    Case ClassElement.QxNC
+      Paint.moveto(0, 26)
+      Paint.LineTo(16, 26)
+      Paint.moveto(35, 26)
+      Paint.LineTo(51, 26)
+      Paint.moveto(16, 26)
+      Paint.MoveTo(28, 15)
+      Paint.LineTo(21, 35)
+      Paint.Arc(26, 26, 10.0, Rad(130), Rad(100), False)
+      Paint.Arc(26, 26, 10.0, Rad(310), Rad(100), False)
+    Case ClassElement.QxNO
+      Paint.moveto(0, 26)
+      Paint.LineTo(16, 26)
+      Paint.moveto(35, 26)
+      Paint.LineTo(51, 26)
+      Paint.moveto(16, 26)
+      Paint.Arc(26, 26, 10.0, Rad(130), Rad(100), False)
+      Paint.Arc(26, 26, 10.0, Rad(310), Rad(100), False)
+    Case ClassElement.gQx
+      Paint.Text(gName, 0, 0, 51, 51, 3)
+      Paint.moveto(0, 26)
+      Paint.LineTo(16, 26)
+      Paint.moveto(35, 26)
+      Paint.LineTo(51, 26)
+      Paint.moveto(16, 26)
+      Paint.Arc(26, 26, 10.0, Rad(130), Rad(100), False)
+      Paint.Arc(26, 26, 10.0, Rad(310), Rad(100), False)
+    Case ClassElement.fgFUNC
+      Paint.Brush = Paint.Color(Color.RGB(153, 206, 255, 150))
+      Paint.rectangle(5, 17, 41, 17, 5)
+      Paint.Fill
+      Paint.Brush = Paint.Color(Color.RGB(0, 0, 0, 0))
+      Paint.rectangle(5, 17, 41, 17, 5)
+      Paint.Text(gName, 0, 0, 51, 51, 3)
+      Paint.moveto(0, 26)
+      Paint.LineTo(5, 26)
+      Paint.moveto(45, 26)
+      Paint.LineTo(51, 26)
+    Case ClassElement.fgFUNCs
+      Dim gY As Integer
+      Paint.Brush = Paint.Color(Color.RGB(153, 206, 255, 150))
+      Paint.rectangle(5, 17, 41, (51 + (17 * gPins.Max)) - 10, 5)
+      Paint.Fill
+      Paint.Brush = Paint.Color(Color.RGB(0, 0, 0, 0))
+      Paint.rectangle(5, 17, 41, (51 + (17 * gPins.Max)) - 10, 5)
+      Paint.Text(gName, 0, 0, 51, 51, 3)
+      Paint.moveto(0, 26)
+      Paint.LineTo(5, 26)
+      Paint.moveto(45, 26)
+      Paint.LineTo(51, 26)
+      For p As Integer = 0 To gPins.Max
+        gY = 43 + (17 * p)
+        If Left(gPins[p]) = "i"
+          Paint.RichText(Mid(gPins[p], 2), 0, gY - 26, 51, 51, 3)
+          Paint.moveto(0, gY)
+          Paint.LineTo(5, gY)
+        Else If Left(gPins[p]) = "o"
+          Paint.RichText(Mid(gPins[p], 2), 0, gY - 26, 51, 51, 3)
+          Paint.moveto(45, gY)
+          Paint.LineTo(51, gY)
+        End If
+      Next
+      
+  End Select
+  
+  Paint.Stroke
+  Paint.End 
+  
+  Return graph
+  
+End

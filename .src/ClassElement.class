@@ -15,6 +15,8 @@ Private eConnectRight As Integer[]
 Property PBox As Object
 Private ePBox As Object
 
+
+
 Public Enum IxNO, IxNC, QxNO, QxNC, QxSC, QxRC, QxP, fADD, fCNTdw, fCNTup, fDIV, fEQ, fGT, fLT, fMUL, fOSHT, fSUB, fTMRoff, fTMRon, fPID, fgFUNC, fgFUNCs, gQx
 
 Private Function X_Read() As Integer
@@ -98,5 +100,32 @@ End
 Private Sub PBox_Write(Value As Object)
   
   ePBox = value
+  
+End
+
+Public Sub Elements_Pack()
+  
+  Dim Elements_new As New ClassElement[]
+  Dim Element_counter_new As Integer = -1
+  
+  For e As Integer = 0 To FMain.Element_counter
+    If FMain.Elements[e] <> Null Then
+      Elements_new.Add(FMain.Elements[e])
+      Element_counter_new = Element_counter_new + 1
+      Elements_new[Element_counter_new].PBox.Tag = Str$(Element_counter_new)
+    Endif
+  Next
+  
+  FMain.Elements = Elements_new
+  FMain.Element_counter = Element_counter_new
+  FMain.Element_scr_counter = FMain.Element_counter
+  FMain.Label1.text = Str$(FMain.Element_scr_counter) & " / " & Str$(FMain.Element_counter)
+  
+  If FMain.Element_counter > 2147483639 Then
+    ErrorForm.Activate
+    ErrorForm.Enabled = True
+    ErrorForm.HasFocus = True
+    ErrorForm.Raise
+  Endif
   
 End
