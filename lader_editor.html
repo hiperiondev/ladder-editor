@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ladder PLC Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 20px;
+            overflow-x: auto;
+        }
+        #controls {
+            margin-bottom: 20px;
+        }
+        #networks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .network-wrapper {
+            position: relative;
+            display: block;
+            margin-bottom: 20px;
+        }
+        .network-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-left: 40px;
+            margin-top: 60px;
+            margin-bottom: 40px;
+        }
+        .network-table td {
+            width: 60px;
+            height: 60px;
+            border: 1px solid #ddd;
+            padding: 0;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            position: relative;
+            overflow: visible;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+        .network-table td:hover {
+            background-color: #f5f5f5;
+        }
+        .network-table td svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+        .row-label, .col-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            position: absolute;
+            pointer-events: none;
+        }
+        .row-label {
+            width: 30px;
+            text-align: right;
+            left: 0;
+            top: calc(60px + var(--row-index) * 60px + 30px);
+        }
+        .col-label {
+            width: 60px;
+            text-align: center;
+            top: 40px;
+            left: calc(40px + var(--col-index) * 60px);
+        }
+        #symbolValues {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        #symbolValues table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        #symbolValues th, #symbolValues td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        #symbolValues th {
+            background-color: #0288d1;
+            color: white;
+        }
+        #symbolValues tr:nth-child(even) td.data {
+            background-color: #fffde7;
+        }
+        #symbolValues tr:nth-child(odd) td.data {
+            background-color: #f5f5f5;
+        }
+        #symbolValues td.network-id {
+            background-color: #e0f7fa;
+        }
+        #symbolValues td.symbol {
+            background-color: #e6ffe6;
+        }
+        #symbolMenu, #dataTypeMenu {
+            position: absolute;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            padding: 5px;
+            display: none;
+            min-width: 150px;
+        }
+        .menu-item {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .menu-item:hover {
+            background-color: #e0e0e0;
+        }
+        .value-pair {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .value-pair select, .value-pair input {
+            margin-right: 5px;
+            font-size: 12px;
+        }
+        button {
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .delete-button {
+            background-color: #ff0000;
+        }
+        .delete-button:hover {
+            background-color: #cc0000;
+        }
+        input {
+            padding: 5px;
+            margin-right: 10px;
+            width: 60px;
+        }
+        .network-controls {
+            position: absolute;
+            top: 0px;
+            left: 0;
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+            z-index: 10;
+        }
+        .network-label {
+            position: absolute;
+            top: -20px;
+            left: 0;
+            font-weight: bold;
+            width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .vertical-bar {
+            position: absolute;
+            z-index: 100;
+        }
+        @media (max-width: 600px) {
+            .network-table td {
+                width: 40px;
+                height: 40px;
+                border: 1px solid #ddd;
+            }
+            .col-label {
+                width: 40px;
+                left: calc(40px + var(--col-index) * 40px);
+                top: 40px;
+            }
+            .row-label {
+                top: calc(60px + var(--row-index) * 40px + 20px);
+            }
+            .network-table {
+                margin-top: 60px;
+                margin-bottom: 20px;
+            }
+            input {
+                width: 50px;
+            }
+            .network-label {
+                width: 120px;
+            }
+            .network-controls {
+                top: 0px;
+                padding: 5px 0;
+            }
+            #symbolValues table {
+                font-size: 12px;
+            }
+            #symbolValues th, #symbolValues td {
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <button onclick="addNetwork()">Add Network</button>
+        <button onclick="saveNetworks()">Save</button>
+        <input type="file" id="loadFile" accept=".json" style="display: none;" onchange="loadNetworks(event)">
+        <button onclick="document.getElementById('loadFile').click()">Load</button>
+        <button onclick="undo()">Undo</button>
+        <button onclick="redo()">Redo</button>
+    </div>
+    <div id="networks-container"></div>
+    <div id="symbolMenu"></div>
+    <div id="dataTypeMenu"></div>
+    <div id="symbolValues"></div>
+
+    <script>
+        const dataTypes = [
+            "NONE", "M", "Q", "I", "Cd", "Cr", "Td", "Tr", "IW", "QW", "C", "T",
+            "D", "CSTR", "REAL", "BASETIME_MS", "BASETIME_10MS", "BASETIME_100MS",
+            "BASETIME_SEC", "BASETIME_MIN", "K"
+        ];
+
+        const symbols = {
+            "NOP": { cells: 1, values: 0, allowedTypes: [], svg: `<svg viewBox="0 0 60 60"><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NOP</text></svg>` },
+            "CONN": { cells: 1, values: 0, allowedTypes: [], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "NEG": { cells: 1, values: 0, allowedTypes: ["NONE"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NEG</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "NO": { cells: 1, values: 1, allowedTypes: ["I", "Q", "D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "NC": { cells: 1, values: 1, allowedTypes: ["I", "Q", "D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="40" x2="40" y2="20" stroke="green" stroke-width="2"/></svg>` },
+            "RE": { cells: 1, values: 1, allowedTypes: ["I", "Q", "D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="30" y="35" font-size="12" text-anchor="middle" fill="green">P</text></svg>` },
+            "FE": { cells: 1, values: 1, allowedTypes: ["I", "Q", "D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="30" y="35" font-size="12" text-anchor="middle" fill="green">N</text></svg>` },
+            "COIL": { cells: 1, values: 1, allowedTypes: ["M", "Q"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "COILL": { cells: 1, values: 1, allowedTypes: ["M", "Q"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="27" y="35" font-size="12" text-anchor="middle" fill="green">S</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "COILU": { cells: 1, values: 1, allowedTypes: ["M", "Q"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="27" y="35" font-size="12" text-anchor="middle" fill="green">R</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "TON": { cells: 2, values: 2, allowedTypes: ["T", "BASETIME_MS", "BASETIME_10MS", "BASETIME_100MS", "BASETIME_SEC", "BASETIME_MIN"], svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TON</text><text x="15" y="40" font-size="10" fillportiva
+
+            "green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x(/\n            x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>` },
+            "TOF": { cells: 2, values: 2, allowedTypes: ["T", "BASETIME_MS", "BASETIME_10MS", "BASETIME_100MS", "BASETIME_SEC", "BASETIME_MIN"], svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TOF</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>` },
+            "TP": { cells: 2, values: 2, allowedTypes: ["T", "BASETIME_MS", "BASETIME_10MS", "BASETIME_100MS", "BASETIME_SEC", "BASETIME_MIN"], svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TP</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>` },
+            "CTU": { cells: 2, values: 2, allowedTypes: ["C", "NONE"], svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">CTU</text><text x="15" y="40" font-size="10" fill="green">CU</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x=" excitations
+
+            "15" y="100" font-size="10" fill="green">R</text><line x1="0" y1="90" x2="10" y2="90" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>` },
+            "CTD": { cells: 2, values: 2, allowedTypes: ["C", "NONE"], svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">CTD</text><text x="15" y="40" font-size="10" fill="green">CD</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="15" y="100" font-size="10" fill="green">R</text><line x1="0" y1="90" x2="10" y2="90" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>` },
+            "MOVE": { cells: 1, values: 2, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MOVE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "SUB": { cells: 3, values: 3, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 180"><rect x="10" y="10" width="40" height="160" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SUB</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/><text x="35" y="160" font-size="10" fill="green">Q2</text><line x1="50" y1="150" x2="60" y2="150" stroke="green" stroke-width="2"/></svg>` },
+            "ADD": { cells: 1, values: 3, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ADD</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "MUL": { cells: 1, values: 3, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MUL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "DIV": { cells: 2, values: 3, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">DIV</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>` },
+            "MOD": { cells: 1, values: 3, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MOD</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "SHL": { cells: 1, values: 2, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SHL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "SHR": { cells: 1, values: 2, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SHR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "ROL": { cells: 1, values: 2, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ROL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "ROR": { cells: 1, values: 2, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ROR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "AND": { cells: 1, values: 3, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">AND</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "OR": { cells: 1, values: 3, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">OR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "XOR": { cells: 1, values: 3, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">XOR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "NOT": { cells: 1, values: 2, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NOT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "EQ": { cells: 1, values: 2, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">EQ</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "GT": { cells: 1, values: 2, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">GT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "GE": { cells: 1, values: 2, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">GE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "LT": { cells: 1, values: 2, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">LT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "LE": { cells: 1, values: 2, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">LE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "NE": { cells: 1, values: 2, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
+            "TMOVE": { cells: 1, values: 3, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TMOVE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` }
+        };
+
+        let networks = [];
+        let networkCounter = 0;
+        let history = [];
+        let historyIndex = -1;
+
+        class Network {
+            constructor(rows, cols) {
+                this.id = networkCounter++;
+                this.rows = rows;
+                this.cols = cols;
+                this.networkData = Array(rows).fill().map(() => Array(cols).fill().map(() => ({
+                    symbol: "NOP",
+                    bar: false,
+                    values: [],
+                    dataTypes: []
+                })));
+                this.createNetworkElement();
+            }
+
+            createNetworkElement() {
+                const container = document.getElementById('networks-container');
+                const wrapper = document.createElement('div');
+                wrapper.className = 'network-wrapper';
+                wrapper.id = `network-container-${this.id}`;
+
+                const label = document.createElement('div');
+                label.className = 'network-label';
+                label.textContent = `Network ${this.id}`;
+
+                const controls = document.createElement('div');
+                controls.className = 'network-controls';
+
+                const rowsLabel = document.createElement('label');
+                rowsLabel.textContent = 'Rows: ';
+                const rowsInput = document.createElement('input');
+                rowsInput.type = 'number';
+                rowsInput.id = `rows-${this.id}`;
+                rowsInput.value = this.rows;
+                rowsInput.min = '1';
+                rowsLabel.appendChild(rowsInput);
+
+                const colsLabel = document.createElement('label');
+                colsLabel.textContent = 'Cols: ';
+                const colsInput = document.createElement('input');
+                colsInput.type = 'number';
+                colsInput.id = `cols-${this.id}`;
+                colsInput.value = this.cols;
+                colsInput.min = '1';
+                colsLabel.appendChild(colsInput);
+
+                const resizeButton = document.createElement('button');
+                resizeButton.textContent = 'Resize';
+                resizeButton.onclick = () => resizeNetwork(this.id);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'delete-button';
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => deleteOrClearNetwork(this.id);
+
+                controls.appendChild(rowsLabel);
+                controls.appendChild(colsLabel);
+                controls.appendChild(resizeButton);
+                controls.appendChild(deleteButton);
+
+                const table = document.createElement('table');
+                table.id = `network-${this.id}`;
+                table.className = 'network-table';
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(controls);
+                wrapper.appendChild(table);
+                container.appendChild(wrapper);
+            }
+
+            clear() {
+                this.networkData = Array(this.rows).fill().map(() => Array(this.cols).fill().map(() => ({
+                    symbol: "NOP",
+                    bar: false,
+                    values: [],
+                    dataTypes: []
+                })));
+                this.renderNetwork();
+                renderSymbolValues();
+            }
+
+            resize(newRows, newCols) {
+                const oldRows = this.rows;
+                const oldCols = this.cols;
+                let truncateWarning = false;
+
+                for (let i = 0; i < oldRows; i++) {
+                    for (let j = 0; j < oldCols; j++) {
+                        const cell = this.networkData[i][j];
+                        if (cell.symbol !== "NOP" && cell.symbol !== "occupied") {
+                            const symbol = symbols[cell.symbol];
+                            if (i + symbol.cells > newRows || j >= newCols) {
+                                truncateWarning = true;
+                            }
+                        }
+                    }
+                }
+
+                if (truncateWarning) {
+                    showToast("Warning: Some symbols may be removed due to smaller dimensions.");
+                }
+
+                this.rows = newRows;
+                this.cols = newCols;
+
+                const newNetworkData = Array(newRows).fill().map(() => Array(newCols).fill().map(() => ({
+                    symbol: "NOP",
+                    bar: false,
+                    values: [],
+                    dataTypes: []
+                })));
+
+                for (let i = 0; i < Math.min(oldRows, newRows); i++) {
+                    for (let j = 0; j < Math.min(oldCols, newCols); j++) {
+                        const cell = this.networkData[i][j];
+                        if (cell.symbol !== "NOP" && cell.symbol !== "occupied") {
+                            const symbol = symbols[cell.symbol];
+                            if (i + symbol.cells <= newRows) {
+                                newNetworkData[i][j] = { ...cell };
+                                for (let k = 1; k < symbol.cells && i + k < newRows; k++) {
+                                    newNetworkData[i + k][j] = {
+                                        symbol: "occupied",
+                                        bar: false,
+                                        values: [],
+                                        dataTypes: []
+                                    };
+                                }
+                            }
+                        } else {
+                            newNetworkData[i][j] = { ...cell };
+                        }
+                    }
+                }
+
+                this.networkData = newNetworkData;
+                document.getElementById(`rows-${this.id}`).value = newRows;
+                document.getElementById(`cols-${this.id}`).value = newCols;
+                this.renderNetwork();
+                renderSymbolValues();
+            }
+
+            renderNetwork() {
+                const network = document.getElementById(`network-${this.id}`);
+                const networkContainer = document.getElementById(`network-container-${this.id}`);
+                if (!network || !networkContainer) {
+                    console.error(`Network ${this.id} or container not found`);
+                    return;
+                }
+                network.innerHTML = '';
+
+                document.querySelectorAll(`#network-container-${this.id} .row-label, #network-container-${this.id} .col-label, #network-container-${this.id} .vertical-bar`).forEach(el => el.remove());
+
+                for (let j = 0; j < this.cols; j++) {
+                    const colLabel = document.createElement('div');
+                    colLabel.className = 'col-label';
+                    colLabel.textContent = j;
+                    colLabel.style.setProperty('--col-index', j);
+                    networkContainer.appendChild(colLabel);
+                }
+
+                for (let i = 0; i < this.rows; i++) {
+                    const tr = document.createElement('tr');
+                    const rowLabel = document.createElement('div');
+                    rowLabel.className = 'row-label';
+                    rowLabel.textContent = i;
+                    rowLabel.style.setProperty('--row-index', i);
+                    networkContainer.appendChild(rowLabel);
+
+                    for (let j = 0; j < this.cols; j++) {
+                        if (this.networkData[i][j].symbol === "occupied") continue;
+
+                        const td = document.createElement('td');
+                        td.dataset.row = i;
+                        td.dataset.col = j;
+                        td.dataset.networkId = this.id;
+                        td.style.width = '60px';
+                        td.style.height = '60px';
+
+                        const cellHeightPx = 60;
+                        const cellWidthPx = 60;
+
+                        if (this.networkData[i][j].symbol !== "NOP") {
+                            const symbol = symbols[this.networkData[i][j].symbol];
+                            try {
+                                const svgContainer = document.createElement('div');
+                                svgContainer.innerHTML = symbol.svg;
+                                const svgElement = svgContainer.querySelector('svg');
+                                if (svgElement) {
+                                    const totalHeight = symbol.cells * cellHeightPx;
+                                    svgElement.setAttribute('width', cellWidthPx.toString());
+                                    svgElement.setAttribute('height', totalHeight.toString());
+                                    td.style.height = `${totalHeight}px`;
+                                    td.rowSpan = symbol.cells;
+                                    td.appendChild(svgElement);
+                                    for (let k = 1; k < symbol.cells && i + k < this.rows; k++) {
+                                        this.networkData[i + k][j].symbol = "occupied";
+                                    }
+                                } else {
+                                    td.innerHTML = '<div style="color: red; font-size: 10px;">Invalid Symbol</div>';
+                                    console.error(`Failed to parse SVG for symbol ${this.networkData[i][j].symbol} at (${i}, ${j})`);
+                                }
+                            } catch (e) {
+                                console.error(`Error rendering symbol ${this.networkData[i][j].symbol} at (${i}, ${j}):`, e);
+                            }
+                        }
+
+                        td.addEventListener('click', showSymbolMenu);
+                        td.addEventListener('contextmenu', showDataTypeMenu);
+                        tr.appendChild(td);
+                    }
+                    network.appendChild(tr);
+                }
+
+                for (let i = 1; i < this.rows; i++) {
+                    for (let j = 0; j < this.cols - 1; j++) {
+                        if (this.networkData[i][j].bar && this.networkData[i][j].symbol !== 'occupied') {
+                            try {
+                                const barDiv = document.createElement('div');
+                                barDiv.className = 'vertical-bar';
+                                const cellWidthPx = 60;
+                                const cellHeightPx = 60;
+                                const barSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                                barSvg.setAttribute('width', '2');
+                                barSvg.setAttribute('height', '60');
+                                barSvg.setAttribute('viewBox', '0 0 2 60');
+                                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                                line.setAttribute('x1', '1');
+                                line.setAttribute('y1', '0');
+                                line.setAttribute('x2', '1');
+                                line.setAttribute('y2', '60');
+                                line.setAttribute('stroke', 'green');
+                                line.setAttribute('stroke-width', '2');
+                                barSvg.appendChild(line);
+                                barDiv.appendChild(barSvg);
+                                barDiv.style.position = 'absolute';
+                                barDiv.style.left = `${40 + j * cellWidthPx + cellWidthPx}px`;
+                                barDiv.style.top = `${60 + (i - 1) * cellHeightPx + 30}px`;
+                                barDiv.style.zIndex = '100';
+                                networkContainer.appendChild(barDiv);
+                            } catch (e) {
+                                console.error(`Error rendering bar at (${i}, ${j}):`, e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function renderSymbolValues() {
+            const symbolValuesDiv = document.getElementById('symbolValues');
+            let html = '<h3>Symbol Values</h3>';
+            html += '<table>';
+            html += '<tr><th>Network ID</th><th>Row</th><th>Column</th><th>Symbol</th><th>Data</th></tr>';
+
+            let rowIndex = 0;
+            networks.forEach(network => {
+                for (let i = 0; i < network.rows; i++) {
+                    for (let j = 0; j < network.cols; j++) {
+                        const cell = network.networkData[i][j];
+                        if (cell.symbol !== "NOP" && cell.symbol !== 'occupied' && cell.values.length > 0) {
+                            const dataStr = cell.values.map((val, idx) => `${cell.dataTypes[idx]} ${val}`).join(', ');
+                            html += `<tr>
+                                <td class="network-id">${network.id}</td>
+                                <td>${i}</td>
+                                <td>${j}</td>
+                                <td class="symbol">${cell.symbol}</td>
+                                <td class="data">${dataStr}</td>
+                            </tr>`;
+                            rowIndex++;
+                        }
+                    }
+                }
+            });
+
+            html += '</table>';
+
+            if (rowIndex === 0) {
+                html += '<p>No values assigned.</p>';
+            }
+
+            symbolValuesDiv.innerHTML = html;
+        }
+
+        function addNetwork() {
+            const newNetwork = new Network(8, 8);
+            networks.push(newNetwork);
+            newNetwork.renderNetwork();
+            renderSymbolValues();
+            saveToHistory();
+        }
+
+        function resizeNetwork(id) {
+            const network = networks.find(n => n.id === id);
+            if (!network) return;
+            const rowsInput = document.getElementById(`rows-${id}`);
+            const colsInput = document.getElementById(`cols-${id}`);
+            const newRows = parseInt(rowsInput.value);
+            const newCols = parseInt(colsInput.value);
+            if (isNaN(newRows) || isNaN(newCols) || newRows < 1 || newCols < 1) {
+                showToast("Rows and columns must be positive numbers.");
+                return;
+            }
+            network.resize(newRows, newCols);
+            saveToHistory();
+        }
+
+        function deleteOrClearNetwork(id) {
+            const network = networks.find(n => n.id === id);
+            if (!network) return;
+
+            if (networks.length === 1) {
+                network.clear();
+                showToast("Network cleared. At least one network must remain.");
+                saveToHistory();
+            } else {
+                const indexToDelete = networks.findIndex(n => n.id === id);
+                const containerToRemove = document.getElementById(`network-container-${id}`);
+                if (containerToRemove) containerToRemove.remove();
+                networks.splice(indexToDelete, 1);
+                document.getElementById('networks-container').innerHTML = '';
+                networks.forEach((network, newIndex) => {
+                    network.id = newIndex;
+                    network.createNetworkElement();
+                    network.renderNetwork();
+                });
+                networkCounter = networks.length;
+                renderSymbolValues();
+                saveToHistory();
+            }
+        }
+
+        function closeAllMenus() {
+            document.getElementById('symbolMenu').style.display = 'none';
+            document.getElementById('dataTypeMenu').style.display = 'none';
+        }
+
+        function showSymbolMenu(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            closeAllMenus();
+            const td = event.currentTarget;
+            const row = parseInt(td.dataset.row);
+            const col = parseInt(td.dataset.col);
+            const networkId = parseInt(td.dataset.networkId);
+            const network = networks.find(n => n.id === networkId);
+            const menu = document.getElementById('symbolMenu');
+            menu.innerHTML = '';
+
+            if (row > 0 && col < network.cols - 1 && network.networkData[row][col].symbol !== 'occupied' && !network.networkData[row][col].bar) {
+                const addBarItem = document.createElement('div');
+                addBarItem.className = 'menu-item';
+                addBarItem.textContent = 'Add Vertical Bar';
+                addBarItem.onclick = () => {
+                    addVerticalBar(networkId, row, col);
+                    menu.style.display = 'none';
+                };
+                menu.appendChild(addBarItem);
+            }
+
+            if (network.networkData[row][col].bar) {
+                const deleteBarItem = document.createElement('div');
+                deleteBarItem.className = 'menu-item';
+                deleteBarItem.textContent = 'Delete Vertical Bar';
+                deleteBarItem.onclick = () => {
+                    deleteVerticalBar(networkId, row, col);
+                    menu.style.display = 'none';
+                };
+                menu.appendChild(deleteBarItem);
+            }
+
+            if (network.networkData[row][col].symbol !== "NOP" && network.networkData[row][col].symbol !== 'occupied') {
+                const deleteItem = document.createElement('div');
+                deleteItem.className = 'menu-item';
+                deleteItem.textContent = 'Delete Symbol';
+                deleteItem.onclick = () => {
+                    placeSymbol(networkId, row, col, 'delete');
+                    menu.style.display = 'none';
+                };
+                menu.appendChild(deleteItem);
+            }
+
+            if (network.networkData[row][col].symbol === "NOP") {
+                Object.keys(symbols).forEach(name => {
+                    const item = document.createElement('div');
+                    item.className = 'menu-item';
+                    item.textContent = name;
+                    item.onclick = () => {
+                        placeSymbolWithValues(networkId, row, col, name);
+                        menu.style.display = 'none';
+                    };
+                    menu.appendChild(item);
+                });
+            }
+
+            const rect = td.getBoundingClientRect();
+            menu.style.left = `${rect.left + window.scrollX}px`;
+            menu.style.top = `${rect.bottom + window.scrollY}px`;
+            menu.style.display = 'block';
+
+            document.addEventListener('click', (e) => {
+                if (!menu.contains(e.target)) menu.style.display = 'none';
+            }, { once: true });
+        }
+
+        function showDataTypeMenu(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            closeAllMenus();
+            const td = event.currentTarget;
+            const row = parseInt(td.dataset.row);
+            const col = parseInt(td.dataset.col);
+            const networkId = parseInt(td.dataset.networkId);
+            const network = networks.find(n => n.id === networkId);
+            const menu = document.getElementById('dataTypeMenu');
+            menu.innerHTML = '';
+
+            if (network.networkData[row][col].symbol === "NOP" || network.networkData[row][col].symbol === 'occupied') return;
+
+            const symbol = symbols[network.networkData[row][col].symbol];
+            const allowedTypes = symbol.allowedTypes.length > 0 ? symbol.allowedTypes : dataTypes;
+            const values = network.networkData[row][col].values;
+            const currentDataTypes = network.networkData[row][col].dataTypes;
+
+            for (let i = 0; i < symbol.values; i++) {
+                const pairDiv = document.createElement('div');
+                pairDiv.className = 'value-pair';
+                const select = document.createElement('select');
+                allowedTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type;
+                    if (type === (currentDataTypes[i] || 'NONE')) option.selected = true;
+                    select.appendChild(option);
+                });
+                select.onchange = () => {
+                    network.networkData[row][col].dataTypes[i] = select.value;
+                    network.renderNetwork();
+                    renderSymbolValues();
+                    saveToHistory();
+                };
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = values[i] || '0';
+                input.oninput = () => {
+                    network.networkData[row][col].values[i] = input.value;
+                    network.renderNetwork();
+                    renderSymbolValues();
+                    saveToHistory();
+                };
+                pairDiv.appendChild(select);
+                pairDiv.appendChild(input);
+                menu.appendChild(pairDiv);
+            }
+
+            const rect = td.getBoundingClientRect();
+            menu.style.left = `${rect.left + window.scrollX}px`;
+            menu.style.top = `${rect.bottom + window.scrollY}px`;
+            menu.style.display = 'block';
+
+            document.addEventListener('click', (e) => {
+                if (!menu.contains(e.target)) menu.style.display = 'none';
+            }, { once: true });
+        }
+
+        function placeSymbolWithValues(networkId, row, col, symbolName) {
+            const network = networks.find(n => n.id === networkId);
+            const symbol = symbols[symbolName];
+            if (row + symbol.cells > network.rows) {
+                showToast("Not enough rows to place this symbol.");
+                return;
+            }
+            let canPlace = true;
+            for (let i = 0; i < symbol.cells && row + i < network.rows; i++) {
+                if (network.networkData[row + i][col].symbol !== "NOP" && network.networkData[row + i][col].symbol !== 'occupied') {
+                    canPlace = false;
+                    break;
+                }
+            }
+            if (canPlace) {
+                const hasBar = network.networkData[row][col].bar;
+                for (let i = 0; i < symbol.cells && row + i < network.rows; i++) {
+                    network.networkData[row + i][col].symbol = i === 0 ? symbolName : 'occupied';
+                    network.networkData[row + i][col].bar = i === 0 ? hasBar : false;
+                    network.networkData[row + i][col].values = i === 0 ? Array(symbol.values).fill('0') : [];
+                    network.networkData[row + i][col].dataTypes = i === 0 ? Array(symbol.values).fill('NONE') : [];
+                }
+                network.renderNetwork();
+                renderSymbolValues();
+                saveToHistory();
+            }
+        }
+
+        function placeSymbol(networkId, row, col, symbolName) {
+            const network = networks.find(n => n.id === networkId);
+            if (symbolName === 'delete') {
+                if (network.networkData[row][col].symbol !== "NOP" && network.networkData[row][col].symbol !== 'occupied') {
+                    const cells = symbols[network.networkData[row][col].symbol].cells;
+                    for (let i = 0; i < cells && row + i < network.rows; i++) {
+                        network.networkData[row + i][col].symbol = "NOP";
+                        network.networkData[row + i][col].bar = i === 0 ? network.networkData[row][col].bar : false;
+                        network.networkData[row + i][col].values = [];
+                        network.networkData[row + i][col].dataTypes = [];
+                    }
+                    network.renderNetwork();
+                    renderSymbolValues();
+                    saveToHistory();
+                }
+            }
+        }
+
+        function addVerticalBar(networkId, row, col) {
+            const network = networks.find(n => n.id === networkId);
+            if (row < 1) {
+                showToast("Cannot place vertical bar in the top row.");
+                return;
+            }
+            if (col >= network.cols - 1) {
+                showToast("Cannot place vertical bar in the last column.");
+                return;
+            }
+            if (network.networkData[row][col].symbol === 'occupied') {
+                showToast("Cannot place vertical bar on an occupied cell.");
+                return;
+            }
+            network.networkData[row][col].bar = true;
+            network.renderNetwork();
+            renderSymbolValues();
+            saveToHistory();
+        }
+
+        function deleteVerticalBar(networkId, row, col) {
+            const network = networks.find(n => n.id === networkId);
+            network.networkData[row][col].bar = false;
+            network.renderNetwork();
+            renderSymbolValues();
+            saveToHistory();
+        }
+
+        function saveNetworks() {
+            const data = networks.map(n => ({
+                id: n.id,
+                rows: n.rows,
+                cols: n.cols,
+                networkData: n.networkData
+            }));
+            const formattedData = JSON.stringify(data, null, 2);
+            const blob = new Blob([formattedData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ladder_networks.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function loadNetworks(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                try {
+                    const data = JSON.parse(text);
+                    if (!Array.isArray(data) || !data.every(n => n.rows && n.cols && n.networkData)) {
+                        throw new Error('Invalid network data format');
+                    }
+                    networks = [];
+                    document.getElementById('networks-container').innerHTML = '';
+                    document.getElementById('symbolValues').innerHTML = '';
+                    networkCounter = 0;
+                    data.forEach(n => {
+                        const network = new Network(n.rows, n.cols);
+                        network.networkData = n.networkData.map(row => row.map(cell => ({
+                            symbol: cell.symbol || "NOP",
+                            bar: !!cell.bar,
+                            values: Array.isArray(cell.values) ? cell.values : [],
+                            dataTypes: Array.isArray(cell.dataTypes) ? cell.dataTypes : []
+                        })));
+                        networks.push(network);
+                        network.renderNetwork();
+                    });
+                    networks.forEach((n, index) => {
+                        n.id = index;
+                    });
+                    renderSymbolValues();
+                    saveToHistory();
+                } catch (error) {
+                    showToast('Error parsing file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.background = '#333';
+            toast.style.color = 'white';
+            toast.style.padding = '10px 20px';
+            toast.style.borderRadius = '5px';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function saveToHistory() {
+            const state = JSON.stringify(networks.map(n => ({
+                id: n.id,
+                rows: n.rows,
+                cols: n.cols,
+                networkData: n.networkData.map(row => row.map(cell => ({ ...cell })))
+            })));
+            if (historyIndex < history.length - 1) {
+                history = history.slice(0, historyIndex + 1);
+            }
+            history.push(state);
+            historyIndex++;
+        }
+
+        function undo() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                restoreFromHistory();
+            }
+        }
+
+        function redo() {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                restoreFromHistory();
+            }
+        }
+
+        function restoreFromHistory() {
+            const state = JSON.parse(history[historyIndex]);
+            networks = [];
+            document.getElementById('networks-container').innerHTML = '';
+            document.getElementById('symbolValues').innerHTML = '';
+            networkCounter = 0;
+            state.forEach(n => {
+                const network = new Network(n.rows, n.cols);
+                network.networkData = n.networkData;
+                networks.push(network);
+                network.renderNetwork();
+            });
+            networks.forEach((n, index) => {
+                n.id = index;
+            });
+            renderSymbolValues();
+        }
+
+        window.onload = function() {
+            addNetwork();
+        };
+    </script>
+</body>
+</html>
