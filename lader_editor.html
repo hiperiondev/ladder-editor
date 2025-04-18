@@ -5,37 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ladder PLC Editor</title>
     <style>
+        :root {
+            --cell-size: 60px;
+            --label-width: 40px;
+            --controls-height: 60px;
+        }
+
+        @media (max-width: 600px) {
+            :root {
+                --cell-size: 40px;
+                --label-width: 30px;
+                --controls-height: 50px;
+            }
+        }
+
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
             margin: 20px;
             overflow-x: auto;
         }
+
         #controls {
             margin-bottom: 20px;
         }
+
         #networks-container {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
+
         .network-wrapper {
             position: relative;
             display: block;
             margin-bottom: 20px;
         }
+
         .network-table {
             border-collapse: separate;
             border-spacing: 0;
             background-color: #fff;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin-left: 40px;
-            margin-top: 60px;
+            margin-left: var(--label-width);
+            margin-top: calc(var(--controls-height) + 20px);
             margin-bottom: 40px;
         }
+
         .network-table td {
-            width: 60px;
-            height: 60px;
+            width: var(--cell-size);
+            height: var(--cell-size);
             border: 1px solid #ddd;
             padding: 0;
             text-align: center;
@@ -46,16 +65,27 @@
             box-sizing: border-box;
             background-color: #fff;
         }
+
         .network-table td:hover {
             background-color: #f5f5f5;
         }
+
         .network-table td svg {
-            display: block;
             width: 100%;
             height: 100%;
+            display: block;
             margin: 0 auto;
             object-fit: contain;
+            preserve-aspect-ratio: meet;
         }
+
+        .multi-cell-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: var(--cell-size);
+        }
+
         .row-label, .col-label {
             font-size: 14px;
             font-weight: bold;
@@ -63,18 +93,21 @@
             position: absolute;
             pointer-events: none;
         }
+
         .row-label {
-            width: 30px;
+            width: var(--label-width);
             text-align: right;
             left: 0;
-            top: calc(60px + var(--row-index) * 60px + 30px);
+            top: calc(var(--controls-height) + 20px + var(--row-index) * var(--cell-size) + (var(--cell-size) / 2));
         }
+
         .col-label {
-            width: 60px;
+            width: var(--cell-size);
             text-align: center;
-            top: 40px;
-            left: calc(40px + var(--col-index) * 60px);
+            top: var(--controls-height);
+            left: calc(var(--label-width) + var(--col-index) * var(--cell-size));
         }
+
         #symbolValues {
             margin-top: 20px;
             background-color: #fff;
@@ -82,32 +115,40 @@
             border-radius: 8px;
             box-shadow: 0 0 5px rgba(0,0,0,0.1);
         }
+
         #symbolValues table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
+
         #symbolValues th, #symbolValues td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
+
         #symbolValues th {
             background-color: #0288d1;
             color: white;
         }
+
         #symbolValues tr:nth-child(even) td.data {
             background-color: #fffde7;
         }
+
         #symbolValues tr:nth-child(odd) td.data {
             background-color: #f5f5f5;
         }
+
         #symbolValues td.network-id {
             background-color: #e0f7fa;
         }
+
         #symbolValues td.symbol {
             background-color: #e6ffe6;
         }
+
         #symbolMenu, #dataTypeMenu {
             position: absolute;
             background-color: #fff;
@@ -118,22 +159,27 @@
             display: none;
             min-width: 150px;
         }
+
         .menu-item {
             padding: 5px 10px;
             cursor: pointer;
         }
+
         .menu-item:hover {
             background-color: #e0e0e0;
         }
+
         .value-pair {
             display: flex;
             align-items: center;
             margin: 5px 0;
         }
+
         .value-pair select, .value-pair input {
             margin-right: 5px;
             font-size: 12px;
         }
+
         button {
             padding: 5px 10px;
             margin-right: 5px;
@@ -142,29 +188,35 @@
             border: none;
             cursor: pointer;
         }
+
         button:hover {
             background-color: #45a049;
         }
+
         .delete-button {
             background-color: #ff0000;
         }
+
         .delete-button:hover {
             background-color: #cc0000;
         }
+
         input {
             padding: 5px;
             margin-right: 10px;
             width: 60px;
         }
+
         .network-controls {
             position: absolute;
-            top: 0px;
+            top: 0;
             left: 0;
             display: flex;
             align-items: center;
             padding: 5px 0;
             z-index: 10;
         }
+
         .network-label {
             position: absolute;
             top: -20px;
@@ -175,37 +227,21 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .vertical-bar {
             position: absolute;
             z-index: 100;
         }
+
         @media (max-width: 600px) {
-            .network-table td {
-                width: 40px;
-                height: 40px;
-                border: 1px solid #ddd;
-            }
-            .col-label {
-                width: 40px;
-                left: calc(40px + var(--col-index) * 40px);
-                top: 40px;
-            }
-            .row-label {
-                top: calc(60px + var(--row-index) * 40px + 20px);
-            }
-            .network-table {
-                margin-top: 60px;
-                margin-bottom: 20px;
+            .row-label, .col-label {
+                font-size: 12px;
             }
             input {
                 width: 50px;
             }
             .network-label {
                 width: 120px;
-            }
-            .network-controls {
-                top: 0px;
-                padding: 5px 0;
             }
             #symbolValues table {
                 font-size: 12px;
@@ -248,14 +284,10 @@
             "COIL": { cells: 1, values: 1, allowedTypes: ["M", "Q"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
             "COILL": { cells: 1, values: 1, allowedTypes: ["M", "Q"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="27" y="35" font-size="12" text-anchor="middle" fill="green">S</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
             "COILU": { cells: 1, values: 1, allowedTypes: ["M", "Q"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="27" y="35" font-size="12" text-anchor="middle" fill="green">R</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
-            "TON": { cells: 2, values: 2, allowedTypes: ["T", "BASETIME_MS", "BASETIME_10MS", "BASETIME_100MS", "BASETIME_SEC", "BASETIME_MIN"], svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TON</text><text x="15" y="40" font-size="10" fillportiva
-
-            "green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x(/\n            x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>` },
+            "TON": { cells: 2, values: 2, allowedTypes: ["T", "BASETIME_MS", "BASETIME_10MS", "BASETIME_100MS", "BASETIME_SEC", "BASETIME_MIN"], svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TON</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>` },
             "TOF": { cells: 2, values: 2, allowedTypes: ["T", "BASETIME_MS", "BASETIME_10MS", "BASETIME_100MS", "BASETIME_SEC", "BASETIME_MIN"], svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TOF</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>` },
             "TP": { cells: 2, values: 2, allowedTypes: ["T", "BASETIME_MS", "BASETIME_10MS", "BASETIME_100MS", "BASETIME_SEC", "BASETIME_MIN"], svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TP</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>` },
-            "CTU": { cells: 2, values: 2, allowedTypes: ["C", "NONE"], svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">CTU</text><text x="15" y="40" font-size="10" fill="green">CU</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x=" excitations
-
-            "15" y="100" font-size="10" fill="green">R</text><line x1="0" y1="90" x2="10" y2="90" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>` },
+            "CTU": { cells: 2, values: 2, allowedTypes: ["C", "NONE"], svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">CTU</text><text x="15" y="40" font-size="10" fill="green">CU</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="15" y="100" font-size="10" fill="green">R</text><line x1="0" y1="90" x2="10" y2="90" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>` },
             "CTD": { cells: 2, values: 2, allowedTypes: ["C", "NONE"], svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">CTD</text><text x="15" y="40" font-size="10" fill="green">CD</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="15" y="100" font-size="10" fill="green">R</text><line x1="0" y1="90" x2="10" y2="90" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>` },
             "MOVE": { cells: 1, values: 2, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MOVE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>` },
             "SUB": { cells: 3, values: 3, allowedTypes: ["D", "T", "C", "IW", "K", "QW"], svg: `<svg viewBox="0 0 60 180"><rect x="10" y="10" width="40" height="160" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SUB</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/><text x="35" y="160" font-size="10" fill="green">Q2</text><line x1="50" y1="150" x2="60" y2="150" stroke="green" stroke-width="2"/></svg>` },
@@ -436,6 +468,10 @@
 
                 document.querySelectorAll(`#network-container-${this.id} .row-label, #network-container-${this.id} .col-label, #network-container-${this.id} .vertical-bar`).forEach(el => el.remove());
 
+                const cellSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell-size'));
+                const labelWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--label-width'));
+                const controlsHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--controls-height'));
+
                 for (let j = 0; j < this.cols; j++) {
                     const colLabel = document.createElement('div');
                     colLabel.className = 'col-label';
@@ -459,11 +495,6 @@
                         td.dataset.row = i;
                         td.dataset.col = j;
                         td.dataset.networkId = this.id;
-                        td.style.width = '60px';
-                        td.style.height = '60px';
-
-                        const cellHeightPx = 60;
-                        const cellWidthPx = 60;
 
                         if (this.networkData[i][j].symbol !== "NOP") {
                             const symbol = symbols[this.networkData[i][j].symbol];
@@ -472,21 +503,24 @@
                                 svgContainer.innerHTML = symbol.svg;
                                 const svgElement = svgContainer.querySelector('svg');
                                 if (svgElement) {
-                                    const totalHeight = symbol.cells * cellHeightPx;
-                                    svgElement.setAttribute('width', cellWidthPx.toString());
-                                    svgElement.setAttribute('height', totalHeight.toString());
-                                    td.style.height = `${totalHeight}px`;
                                     td.rowSpan = symbol.cells;
+                                    svgElement.style.width = 'var(--cell-size)';
+                                    svgElement.style.height = `calc(var(--cell-size) * ${symbol.cells})`;
+                                    svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                                    if (symbol.cells > 1) {
+                                        svgElement.classList.add('multi-cell-svg');
+                                        td.style.position = 'relative';
+                                    }
                                     td.appendChild(svgElement);
                                     for (let k = 1; k < symbol.cells && i + k < this.rows; k++) {
                                         this.networkData[i + k][j].symbol = "occupied";
                                     }
                                 } else {
                                     td.innerHTML = '<div style="color: red; font-size: 10px;">Invalid Symbol</div>';
-                                    console.error(`Failed to parse SVG for symbol ${this.networkData[i][j].symbol} at (${i}, ${j})`);
+                                    console.error(`Failed to parse SVG for symbol ${this.networkData[i][j].symbol}`);
                                 }
                             } catch (e) {
-                                console.error(`Error rendering symbol ${this.networkData[i][j].symbol} at (${i}, ${j}):`, e);
+                                console.error(`Error rendering symbol ${this.networkData[i][j].symbol}:`, e);
                             }
                         }
 
@@ -503,25 +537,21 @@
                             try {
                                 const barDiv = document.createElement('div');
                                 barDiv.className = 'vertical-bar';
-                                const cellWidthPx = 60;
-                                const cellHeightPx = 60;
                                 const barSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                                 barSvg.setAttribute('width', '2');
-                                barSvg.setAttribute('height', '60');
-                                barSvg.setAttribute('viewBox', '0 0 2 60');
+                                barSvg.setAttribute('height', cellSize.toString());
+                                barSvg.setAttribute('viewBox', `0 0 2 ${cellSize}`);
                                 const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                                 line.setAttribute('x1', '1');
                                 line.setAttribute('y1', '0');
                                 line.setAttribute('x2', '1');
-                                line.setAttribute('y2', '60');
+                                line.setAttribute('y2', cellSize.toString());
                                 line.setAttribute('stroke', 'green');
                                 line.setAttribute('stroke-width', '2');
                                 barSvg.appendChild(line);
                                 barDiv.appendChild(barSvg);
-                                barDiv.style.position = 'absolute';
-                                barDiv.style.left = `${40 + j * cellWidthPx + cellWidthPx}px`;
-                                barDiv.style.top = `${60 + (i - 1) * cellHeightPx + 30}px`;
-                                barDiv.style.zIndex = '100';
+                                barDiv.style.left = `${labelWidth + (j + 1) * cellSize}px`;
+                                barDiv.style.top = `${controlsHeight + 20 + (i - 1) * cellSize + (cellSize / 2)}px`;
                                 networkContainer.appendChild(barDiv);
                             } catch (e) {
                                 console.error(`Error rendering bar at (${i}, ${j}):`, e);
@@ -757,7 +787,7 @@
             }
             let canPlace = true;
             for (let i = 0; i < symbol.cells && row + i < network.rows; i++) {
-                if (network.networkData[row + i][col].symbol !== "NOP" && network.networkData[row + i][col].symbol !== 'occupied') {
+                if (network.networkData[row + i][col].symbol !== "NOP") {
                     canPlace = false;
                     break;
                 }
@@ -773,6 +803,8 @@
                 network.renderNetwork();
                 renderSymbolValues();
                 saveToHistory();
+            } else {
+                showToast("Cannot place symbol: space is already occupied.");
             }
         }
 
