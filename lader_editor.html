@@ -692,7 +692,7 @@
                         ]
                     }
                 ],
-                svg: `<svg viewBox="0 0 60 180"><rect x="10" y="10" width="40" height="160" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SUB</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="91" x2="60" y2="91" stroke="green" stroke-width="2"/><text x="35" y="160" font-size="10" fill="green">Q2</text><line x1="50" y1="151" x2="60" y2="151" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 180"><rect x="10" y="10" width="40" height="160" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SUB</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/><text x="35" y="160" font-size="10" fill="green">Q2</text><line x1="50" y1="150" x2="60" y2="150" stroke="green" stroke-width="2"/></svg>`,
                 pins: [
                     { left: true, right: true },
                     { left: false, right: true },
@@ -1375,6 +1375,7 @@
         let networkCounter = 0;
         let history = [];
         let historyIndex = -1;
+        let currentMenu = null; // Track the currently open menu
 
         /**
          * Class representing a single network in the ladder logic editor.
@@ -1433,9 +1434,6 @@
                 colsLabel.appendChild(colsInput);
 
                 const resizeButton = document.createElement('button');
-                resizeButton.textContent = 'Resize';
-                resizeButton.onclick = () => resizeNetwork(this.id);
-
                 const deleteButton = document.createElement('button');
                 deleteButton.className = 'delete-button';
                 deleteButton.textContent = 'Delete';
@@ -1742,11 +1740,12 @@
         }
 
         /**
-         * Hides all open popup menus.
+         * Hides all open popup menus and resets the currentMenu variable.
          */
         function closeAllMenus() {
             document.getElementById('symbolMenu').style.display = 'none';
             document.getElementById('dataTypeMenu').style.display = 'none';
+            currentMenu = null; // Reset the current menu
         }
 
         /**
@@ -1771,7 +1770,7 @@
                 addBarItem.textContent = 'Add Vertical Bar';
                 addBarItem.onclick = () => {
                     addVerticalBar(networkId, row, col);
-                    menu.style.display = 'none';
+                    closeAllMenus();
                 };
                 menu.appendChild(addBarItem);
             }
@@ -1782,7 +1781,7 @@
                 deleteBarItem.textContent = 'Delete Vertical Bar';
                 deleteBarItem.onclick = () => {
                     deleteVerticalBar(networkId, row, col);
-                    menu.style.display = 'none';
+                    closeAllMenus();
                 };
                 menu.appendChild(deleteBarItem);
             }
@@ -1793,7 +1792,7 @@
                 deleteItem.textContent = 'Delete Symbol';
                 deleteItem.onclick = () => {
                     placeSymbol(networkId, row, col, 'delete');
-                    menu.style.display = 'none';
+                    closeAllMenus();
                 };
                 menu.appendChild(deleteItem);
             }
@@ -1805,7 +1804,7 @@
                     item.textContent = name;
                     item.onclick = () => {
                         placeSymbolWithValues(networkId, row, col, name);
-                        menu.style.display = 'none';
+                        closeAllMenus();
                     };
                     menu.appendChild(item);
                 });
@@ -1815,10 +1814,7 @@
             menu.style.left = `${rect.left + window.scrollX}px`;
             menu.style.top = `${rect.bottom + window.scrollY}px`;
             menu.style.display = 'block';
-
-            document.addEventListener('click', (e) => {
-                if (!menu.contains(e.target)) menu.style.display = 'none';
-            }, { once: true });
+            currentMenu = menu; // Set the current menu to symbol menu
         }
 
         /**
@@ -1896,10 +1892,7 @@
             menu.style.left = `${rect.left + window.scrollX}px`;
             menu.style.top = `${rect.bottom + window.scrollY}px`;
             menu.style.display = 'block';
-
-            document.addEventListener('click', (e) => {
-                if (!menu.contains(e.target)) menu.style.display = 'none';
-            }, { once: true });
+            currentMenu = menu; // Set the current menu to data type menu
         }
 
         /**
@@ -2300,6 +2293,14 @@
                 if (blinkingRow) {
                     blinkingRow.classList.remove('blinking');
                 }
+            }
+        });
+
+        // Global click listener to close the current menu if clicked outside
+        document.addEventListener('click', function(e) {
+            if (currentMenu && !currentMenu.contains(e.target)) {
+                currentMenu.style.display = 'none';
+                currentMenu = null;
             }
         });
 
