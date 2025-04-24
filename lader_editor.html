@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ladder PLC Editor</title>
+    <style>
+        /* Root variables defining cell size, label width, and controls height for consistent layout */
+        :root {
+            --cell-size: 60px;
+            --label-width: 40px;
+            --controls-height: 60px;
+        }
+        /* Responsive design adjustments for mobile devices */
+        @media (max-width: 600px) {
+            :root {
+                --cell-size: 40px;
+                --label-width: 30px;
+                --controls-height: 50px;
+            }
+            /* Hide table headers in symbol values on small screens */
+            #symbolValues th {
+                display: none;
+            }
+        }
+        /* Base styling for the body of the editor */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 20px;
+            overflow-x: auto;
+        }
+        /* Styling for the main controls section */
+        #controls {
+            margin-bottom: 20px;
+        }
+        /* Flexbox container for arranging network diagrams vertically */
+        #networks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        /* Wrapper for each network diagram, allowing relative positioning of child elements */
+        .network-wrapper {
+            position: relative;
+            display: block;
+            margin-bottom: 20px;
+        }
+        /* Styling for the network table grid */
+        .network-table {
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-left: var(--label-width);
+            margin-top: calc(var(--controls-height) + 20px);
+            margin-bottom: 40px;
+            border: 1px solid #ddd;
+        }
+        /* Styling for individual cells within the network table */
+        .network-table td {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            border: 1px solid #ddd;
+            padding: 0;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            position: relative;
+            overflow: visible;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+        /* Hover effect for table cells to indicate interactivity */
+        .network-table td:hover {
+            background-color: #f5f5f5;
+        }
+        /* Styling for SVG elements within table cells */
+        .network-table td svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+            preserveAspectRatio: meet;
+        }
+        /* Styling for multi-cell SVGs spanning multiple rows */
+        .multi-cell-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: var(--cell-size);
+        }
+        /* Base styling for row and column labels */
+        .row-label, .col-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            position: absolute;
+            pointer-events: none;
+        }
+        /* Specific positioning for row labels */
+        .row-label {
+            width: var(--label-width);
+            text-align: right;
+            left: 0;
+            padding-right: 6px;
+            top: calc(var(--controls-height) + 20px + var(--row-index) * var(--cell-size) + (var(--cell-size) / 2));
+            transform: translateY(-50%);
+        }
+        /* Specific positioning for column labels */
+        .col-label {
+            width: var(--cell-size);
+            text-align: center;
+            top: calc(var(--controls-height) + 20px - 3px - 14px);
+            left: calc(var(--label-width) + var(--col-index) * var(--cell-size));
+        }
+        /* Styling for the symbol values display section */
+        #symbolValues {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        /* Styling for the table within the symbol values section */
+        #symbolValues table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        /* Styling for table headers and cells in symbol values */
+        #symbolValues th, #symbolValues td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        /* Header styling for symbol values table */
+        #symbolValues th {
+            background-color: #0288d1;
+            color: white;
+        }
+        /* Alternating row colors for data cells in symbol values */
+        #symbolValues tr:nth-child(even) td.data {
+            background-color: #fffde7;
+        }
+        #symbolValues tr:nth-child(odd) td.data {
+            background-color: #f5f5f5;
+        }
+        /* Specific styling for network ID and symbol cells */
+        #symbolValues td.network-id {
+            background-color: #e0f7fa;
+        }
+        #symbolValues td.symbol {
+            background-color: #e6ffe6;
+        }
+        /* Styling for popup menus for symbol and data type selection */
+        #symbolMenu, #dataTypeMenu {
+            position: absolute;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            padding: 5px;
+            display: none;
+            min-width: 150px;
+        }
+        /* Styling for menu items */
+        .menu-item {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .menu-item:hover {
+            background-color: #e0e0e0;
+        }
+        /* Styling for data entry fields in data type menu */
+        .value-entry {
+            margin-bottom: 10px;
+        }
+        .value-label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .value-pair {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .value-pair select, .value-pair input, .value-pair span {
+            margin-right: 5px;
+            font-size: 12px;
+        }
+        /* General button styling */
+        button {
+            padding: 5px 10px;
+            margin-right: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .delete-button {
+            background-color: #ff0000;
+        }
+        .delete-button:hover {
+            background-color: #cc0000;
+        }
+        /* Styling for input fields */
+        input {
+            padding: 5px;
+            margin-right: 10px;
+            width: 60px;
+        }
+        /* Styling for network-specific controls */
+        .network-controls {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+            z-index: 10;
+        }
+        /* Styling for network labels above each network */
+        .network-label {
+            position: absolute;
+            top: -20px;
+            left: 0;
+            font-weight: bold;
+            width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* Styling for vertical bars connecting cells */
+        .vertical-bar {
+            position: absolute;
+            z-index: 100;
+        }
+        /* Mobile-specific adjustments for labels and inputs */
+        @media (max-width: 600px) {
+            .row-label, .col-label {
+                font-size: 12px;
+            }
+            .row-label {
+                left: 0;
+                padding-right: 6px;
+            }
+            .col-label {
+                top: calc(var(--controls-height) + 20px - 3px - 12px);
+            }
+            input {
+                width: 50px;
+            }
+            .network-label {
+                width: 120px;
+            }
+            /* Responsive table layout for symbol values on small screens */
+            #symbolValues table {
+                font-size: 12px;
+            }
+            #symbolValues th, #symbolValues td {
+                padding: 5px;
+            }
+            #symbolValues table, #symbolValues thead, #symbolValues tbody, #symbolValues th, #symbolValues td, #symbolValues tr {
+                display: block;
+            }
+            #symbolValues thead {
+                display: none;
+            }
+            #symbolValues tr {
+                margin-bottom: 15px;
+            }
+            #symbolValues td {
+                border: none;
+                position: relative;
+                padding-left: 50%;
+                text-align: left;
+            }
+            #symbolValues td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                font-weight: bold;
+            }
+            #symbolValues td.data {
+                word-wrap: break-word;
+            }
+        }
+        /* Blinking animation for highlighting cells and rows */
+        .blinking {
+            animation: backgroundBlink 1s infinite;
+        }
+        .blinking svg [stroke] {
+            animation: strokeBlink 1s infinite;
+        }
+        .blinking svg text {
+            animation: fillBlink 1s infinite;
+        }
+        @keyframes backgroundBlink {
+            0% { background-color: #fff; }
+            50% { background-color: #ffcccc; }
+            100% { background-color: #fff; }
+        }
+        @keyframes strokeBlink {
+            0% { stroke: green; }
+            50% { stroke: red; }
+            100% { stroke: green; }
+        }
+        @keyframes fillBlink {
+            0% { fill: green; }
+            50% { fill: red; }
+            100% { fill: green; }
+        }
+        tr.blinking td {
+            animation: rowBlink 1s infinite;
+        }
+        @keyframes rowBlink {
+            0% { background-color: #fff; }
+            50% { background-color: #ffcccc; }
+            100% { background-color: #fff; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main controls section with buttons for adding networks, saving, loading, undoing, and redoing -->
+    <div id="controls">
+        <button onclick="addNetwork()">Add Network</button>
+        <button onclick="saveNetworks()">Save</button>
+        <input type="file" id="loadFile" accept=".json" style="display: none;" onchange="loadNetworks(event)">
+        <button onclick="document.getElementById('loadFile').click()">Load</button>
+        <button onclick="undo()">Undo</button>
+        <button onclick="redo()">Redo</button>
+    </div>
+    <!-- Container for displaying all network diagrams -->
+    <div id="networks-container"></div>
+    <!-- Popup menu for selecting symbols to place in the network -->
+    <div id="symbolMenu"></div>
+    <!-- Popup menu for configuring data types and values for symbols -->
+    <div id="dataTypeMenu"></div>
+    <!-- Section displaying a table of symbol values across all networks -->
+    <div id="symbolValues"></div>
+
+    <script>
+        // Array of valid data types for symbol properties
+        const dataTypes = [
+            "NONE", "M", "Q", "I", "Cd", "Cr", "Td", "Tr", "IW", "QW", "C", "T",
+            "D", "CSTR", "REAL", "MS", "10MS", "100MS",
+            "SEC", "MIN", "K"
+        ];
+
+        // Object defining ladder logic symbols with their properties and SVG representations
+        const symbols = {
+            // No operation, does nothing in the ladder logic
+            "NOP": {
+                cells: 1,
+                dataEntries: [],
+                svg: `<svg viewBox="0 0 60 60"><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NOP</text></svg>`,
+                pins: [{ left: false, right: false }]
+            },
+            // Connection, represents a wire connecting elements
+            "CONN": {
+                cells: 1,
+                dataEntries: [],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Negation, inverts the input signal
+            "NEG": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: ["NONE"]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NEG</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Normally Open contact, passes signal when input is true
+            "NO": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "I",
+                            "Q",
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Normally Closed contact, passes signal when input is false
+            "NC": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "I",
+                            "Q",
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="40" x2="40" y2="20" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Rising Edge detector, triggers on input transition from false to true
+            "RE": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "I",
+                            "Q",
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="30" y="35" font-size="12" text-anchor="middle" fill="green">P</text></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Falling Edge detector, triggers on input transition from true to false
+            "FE": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "I",
+                            "Q",
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="30" y="35" font-size="12" text-anchor="middle" fill="green">N</text></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Output coil, activates an output when energized
+            "COIL": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "M",
+                            "Q"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Latch coil (set), sets an output to true when energized
+            "COILL": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "M",
+                            "Q"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="27" y="35" font-size="12" text-anchor="middle" fill="green">S</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Unlatch coil (reset), sets an output to false when energized
+            "COILU": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "M",
+                            "Q"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="27" y="35" font-size="12" text-anchor="middle" fill="green">R</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // On-delay timer, delays turning on an output
+            "TON": {
+                cells: 2,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: ["T"]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "MS",
+                            "10MS",
+                            "100MS",
+                            "SEC",
+                            "MIN"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TON</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
+                pins: [
+                    { left: true, right: true },
+                    { left: false, right: true }
+                ]
+            },
+            // Off-delay timer, delays turning off an output
+            "TOF": {
+                cells: 2,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: ["T"]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "MS",
+                            "10MS",
+                            "100MS",
+                            "SEC",
+                            "MIN"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TOF</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
+                pins: [
+                    { left: true, right: true },
+                    { left: false, right: true }
+                ]
+            },
+            // Pulse timer, generates a pulse of specified duration
+            "TP": {
+                cells: 2,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: ["T"]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "MS",
+                            "10MS",
+                            "100MS",
+                            "SEC",
+                            "MIN"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TP</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
+                pins: [
+                    { left: true, right: true },
+                    { left: false, right: true }
+                ]
+            },
+            // Up counter, increments a counter on each rising edge
+            "CTU": {
+                cells: 2,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: ["C"]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: ["NONE"]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">CTU</text><text x="15" y="40" font-size="10" fill="green">CU</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="15" y="100" font-size="10" fill="green">R</text><line x1="0" y1="90" x2="10" y2="90" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
+                pins: [
+                    { left: true, right: true },
+                    { left: true, right: true }
+                ]
+            },
+            // Down counter, decrements a counter on each rising edge
+            "CTD": {
+                cells: 2,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: ["C"]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: ["NONE"]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">CTD</text><text x="15" y="40" font-size="10" fill="green">CD</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="15" y="100" font-size="10" fill="green">R</text><line x1="0" y1="90" x2="10" y2="90" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
+                pins: [
+                    { left: true, right: true },
+                    { left: true, right: true }
+                ]
+            },
+            // Move data from one location to another
+            "MOVE": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MOVE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Subtract two values and store the result
+            "SUB": {
+                cells: 3,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value3",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 180"><rect x="10" y="10" width="40" height="160" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SUB</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="91" x2="60" y2="91" stroke="green" stroke-width="2"/><text x="35" y="160" font-size="10" fill="green">Q2</text><line x1="50" y1="151" x2="60" y2="151" stroke="green" stroke-width="2"/></svg>`,
+                pins: [
+                    { left: true, right: true },
+                    { left: false, right: true },
+                    { left: false, right: true }
+                ]
+            },
+            // Add two values and store the result
+            "ADD": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value3",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ADD</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Multiply two values and store the result
+            "MUL": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value3",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MUL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Divide two values and store the result
+            "DIV": {
+                cells: 2,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value3",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">DIV</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
+                pins: [
+                    { left: true, right: true },
+                    { left: false, right: true }
+                ]
+            },
+            // Modulo operation, computes remainder of division
+            "MOD": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value3",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MOD</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Shift left, shifts bits left by specified amount
+            "SHL": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SHL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Shift right, shifts bits right by specified amount
+            "SHR": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SHR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Rotate left, rotates bits left by specified amount
+            "ROL": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ROL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Rotate right, rotates bits right by specified amount
+            "ROR": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ROR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Bitwise AND, performs logical AND on two inputs
+            "AND": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value3",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">AND</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Bitwise OR, performs logical OR on two inputs
+            "OR": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value3",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">OR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Bitwise XOR, performs logical XOR on two inputs
+            "XOR": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value3",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">XOR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Bitwise NOT, inverts all bits of the input
+            "NOT": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NOT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Equal comparison, outputs true if two values are equal
+            "EQ": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">EQ</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Greater than comparison, outputs true if first value is greater
+            "GT": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">GT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Greater than or equal comparison, outputs true if first value is greater or equal
+            "GE": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">GE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Less than comparison, outputs true if first value is less
+            "LT": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">LT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Less than or equal comparison, outputs true if first value is less or equal
+            "LE": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">LE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Not equal comparison, outputs true if two values are not equal
+            "NE": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            },
+            // Table move, moves a block of data from one location to another
+            "TMOVE": {
+                cells: 1,
+                dataEntries: [
+                    {
+                        name: "value1",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value2",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    },
+                    {
+                        name: "value3",
+                        allowedTypes: [
+                            "D",
+                            "T",
+                            "C",
+                            "IW",
+                            "K",
+                            "QW"
+                        ]
+                    }
+                ],
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TMOVE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                pins: [{ left: true, right: true }]
+            }
+        };
+
+        // Constants defining maximum limits for network dimensions and count
+        const MAX_ROWS = 100;
+        const MAX_COLS = 100;
+        const MAX_NETWORKS = 10;
+
+        // Array of coil symbol names for special handling
+        const coilSymbols = ["COIL", "COILL", "COILU"];
+
+        // Global variables for managing networks and history
+        let networks = [];
+        let networkCounter = 0;
+        let history = [];
+        let historyIndex = -1;
+
+        /**
+         * Class representing a single network in the ladder logic editor.
+         */
+        class Network {
+            /**
+             * Constructs a new Network instance.
+             * @param {number} rows - Number of rows in the network grid.
+             * @param {number} cols - Number of columns in the network grid.
+             * @param {number} [id=null] - Optional ID for the network; auto-increments if null.
+             */
+            constructor(rows, cols, id = null) {
+                this.id = id !== null ? id : networkCounter++;
+                this.rows = rows;
+                this.cols = cols;
+                this.networkData = Array(rows).fill().map(() => Array(cols).fill().map(() => ({
+                    symbol: "NOP",
+                    bar: false,
+                    data: []
+                })));
+                this.createNetworkElement();
+            }
+
+            /**
+             * Creates and appends HTML elements for the network to the DOM.
+             */
+            createNetworkElement() {
+                const container = document.getElementById('networks-container');
+                const wrapper = document.createElement('div');
+                wrapper.className = 'network-wrapper';
+                wrapper.id = `network-container-${this.id}`;
+
+                const label = document.createElement('div');
+                label.className = 'network-label';
+                label.textContent = `Network ${this.id}`;
+
+                const controls = document.createElement('div');
+                controls.className = 'network-controls';
+
+                const rowsLabel = document.createElement('label');
+                rowsLabel.textContent = 'Rows: ';
+                const rowsInput = document.createElement('input');
+                rowsInput.type = 'number';
+                rowsInput.id = `rows-${this.id}`;
+                rowsInput.value = this.rows;
+                rowsInput.min = '1';
+                rowsLabel.appendChild(rowsInput);
+
+                const colsLabel = document.createElement('label');
+                colsLabel.textContent = 'Cols: ';
+                const colsInput = document.createElement('input');
+                colsInput.type = 'number';
+                colsInput.id = `cols-${this.id}`;
+                colsInput.value = this.cols;
+                colsInput.min = '1';
+                colsLabel.appendChild(colsInput);
+
+                const resizeButton = document.createElement('button');
+                resizeButton.textContent = 'Resize';
+                resizeButton.onclick = () => resizeNetwork(this.id);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'delete-button';
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => deleteOrClearNetwork(this.id);
+
+                controls.appendChild(rowsLabel);
+                controls.appendChild(colsLabel);
+                controls.appendChild(resizeButton);
+                controls.appendChild(deleteButton);
+
+                const table = document.createElement('table');
+                table.id = `network-${this.id}`;
+                table.className = 'network-table';
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(controls);
+                wrapper.appendChild(table);
+                container.appendChild(wrapper);
+            }
+
+            /**
+             * Resets all cells in the network to "NOP" with no bars or data.
+             */
+            clear() {
+                this.networkData = Array(this.rows).fill().map(() => Array(this.cols).fill().map(() => ({
+                    symbol: "NOP",
+                    bar: false,
+                    data: []
+                })));
+                this.renderNetwork();
+                renderSymbolValues();
+            }
+
+            /**
+             * Resizes the network grid, preserving data where possible.
+             * @param {number} newRows - New number of rows.
+             * @param {number} newCols - New number of columns.
+             */
+            resize(newRows, newCols) {
+                const oldRows = this.rows;
+                const oldCols = this.cols;
+                let truncateWarning = false;
+
+                for (let i = 0; i < oldRows; i++) {
+                    for (let j = 0; j < oldCols; j++) {
+                        const cell = this.networkData[i][j];
+                        if (cell.symbol !== "NOP" && cell.symbol !== "occupied") {
+                            const symbol = symbols[cell.symbol];
+                            if (i + symbol.cells > newRows || j >= newCols) {
+                                truncateWarning = true;
+                            }
+                        }
+                    }
+                }
+
+                if (truncateWarning) {
+                    showToast("Warning: Some symbols may be removed due to smaller dimensions.");
+                }
+
+                this.rows = newRows;
+                this.cols = newCols;
+
+                const newNetworkData = Array(newRows).fill().map(() => Array(newCols).fill().map(() => ({
+                    symbol: "NOP",
+                    bar: false,
+                    data: []
+                })));
+
+                for (let i = 0; i < Math.min(oldRows, newRows); i++) {
+                    for (let j = 0; j < Math.min(oldCols, newCols); j++) {
+                        const cell = this.networkData[i][j];
+                        if (cell.symbol !== "NOP" && cell.symbol !== "occupied") {
+                            const symbol = symbols[cell.symbol];
+                            if (i + symbol.cells <= newRows) {
+                                newNetworkData[i][j] = { ...cell };
+                                for (let k = 1; k < symbol.cells && i + k < newRows; k++) {
+                                    newNetworkData[i + k][j] = {
+                                        symbol: "occupied",
+                                        bar: false,
+                                        data: []
+                                    };
+                                }
+                            }
+                        } else {
+                            newNetworkData[i][j] = { ...cell };
+                        }
+                    }
+                }
+
+                this.networkData = newNetworkData;
+                document.getElementById(`rows-${this.id}`).value = newRows;
+                document.getElementById(`cols-${this.id}`).value = newCols;
+                this.renderNetwork();
+                renderSymbolValues();
+            }
+
+            /**
+             * Renders the network grid, including symbols, labels, and vertical bars.
+             */
+            renderNetwork() {
+                const network = document.getElementById(`network-${this.id}`);
+                const networkContainer = document.getElementById(`network-container-${this.id}`);
+                if (!network || !networkContainer) {
+                    console.error(`Network ${this.id} or container not found`);
+                    return;
+                }
+                network.innerHTML = '';
+
+                document.querySelectorAll(`#network-container-${this.id} .row-label, #network-container-${this.id} .col-label, #network-container-${this.id} .vertical-bar`).forEach(el => el.remove());
+
+                const cellSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell-size')) || 60;
+                const labelWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--label-width')) || 40;
+                const controlsHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--controls-height')) || 60;
+
+                for (let j = 0; j < this.cols; j++) {
+                    const colLabel = document.createElement('div');
+                    colLabel.className = 'col-label';
+                    colLabel.textContent = j;
+                    colLabel.style.setProperty('--col-index', j);
+                    networkContainer.appendChild(colLabel);
+                }
+
+                for (let i = 0; i < this.rows; i++) {
+                    const tr = document.createElement('tr');
+                    const rowLabel = document.createElement('div');
+                    rowLabel.className = 'row-label';
+                    rowLabel.textContent = i;
+                    rowLabel.style.setProperty('--row-index', i);
+                    networkContainer.appendChild(rowLabel);
+
+                    for (let j = 0; j < this.cols; j++) {
+                        if (this.networkData[i][j].symbol === "occupied") continue;
+
+                        const td = document.createElement('td');
+                        td.dataset.row = i;
+                        td.dataset.col = j;
+                        td.dataset.networkId = this.id;
+
+                        if (this.networkData[i][j].symbol !== "NOP") {
+                            const symbol = symbols[this.networkData[i][j].symbol];
+                            try {
+                                const svgContainer = document.createElement('div');
+                                svgContainer.innerHTML = symbol.svg;
+                                const svgElement = svgContainer.querySelector('svg');
+                                if (svgElement) {
+                                    td.rowSpan = symbol.cells;
+                                    svgElement.style.width = `${cellSize}px`;
+                                    svgElement.style.height = `${cellSize * symbol.cells}px`;
+                                    svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                                    if (symbol.cells > 1) {
+                                        svgElement.classList.add('multi-cell-svg');
+                                        td.style.position = 'relative';
+                                    }
+                                    td.appendChild(svgElement);
+                                    for (let k = 1; k < symbol.cells && i + k < this.rows; k++) {
+                                        this.networkData[i + k][j].symbol = "occupied";
+                                    }
+                                } else {
+                                    td.innerHTML = '<div style="color: red; font-size: 10px;">Invalid Symbol</div>';
+                                    console.error(`Failed to parse SVG for symbol ${this.networkData[i][j].symbol}`);
+                                }
+                            } catch (e) {
+                                console.error(`Error rendering symbol ${this.networkData[i][j].symbol}:`, e);
+                            }
+                        }
+
+                        td.addEventListener('click', showSymbolMenu);
+                        td.addEventListener('contextmenu', showDataTypeMenu);
+                        tr.appendChild(td);
+                    }
+                    network.appendChild(tr);
+                }
+
+                for (let i = 1; i < this.rows; i++) {
+                    for (let j = 0; j < this.cols - 1; j++) {
+                        if (this.networkData[i][j].bar && this.networkData[i][j].symbol !== 'occupied') {
+                            try {
+                                const barDiv = document.createElement('div');
+                                barDiv.className = 'vertical-bar';
+                                const barSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                                barSvg.setAttribute('width', '2');
+                                barSvg.setAttribute('height', cellSize.toString());
+                                barSvg.setAttribute('viewBox', `0 0 2 ${cellSize}`);
+                                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                                line.setAttribute('x1', '1');
+                                line.setAttribute('y1', '0');
+                                line.setAttribute('x2', '1');
+                                line.setAttribute('y2', cellSize.toString());
+                                line.setAttribute('stroke', 'green');
+                                line.setAttribute('stroke-width', '2');
+                                barSvg.appendChild(line);
+                                barDiv.appendChild(barSvg);
+                                barDiv.style.left = `${labelWidth + (j + 1) * cellSize}px`;
+                                barDiv.style.top = `${controlsHeight + 20 + (i - 1) * cellSize + cellSize / 2}px`;
+                                networkContainer.appendChild(barDiv);
+                            } catch (e) {
+                                console.error(`Error rendering bar at (${i}, ${j}):`, e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * Updates the symbol values table with current network data.
+         */
+        function renderSymbolValues() {
+            const symbolValuesDiv = document.getElementById('symbolValues');
+            let html = '<h3>Symbol Values</h3>';
+            html += '<table>';
+            html += '<tr><th>Network ID</th><th>Row</th><th>Column</th><th>Symbol</th><th>Data</th></tr>';
+
+            let rowIndex = 0;
+            networks.forEach(network => {
+                for (let i = 0; i < network.rows; i++) {
+                    for (let j = 0; j < network.cols; j++) {
+                        const cell = network.networkData[i][j];
+                        if (cell.symbol !== "NOP" && cell.symbol !== 'occupied' && cell.data.length > 0) {
+                            const dataStr = cell.data.map(d => `${d.name}: ${d.type} ${d.value}`).join(', ');
+                            html += `<tr class="symbol-row">
+                                <td data-label="Network ID" class="network-id">${network.id}</td>
+                                <td data-label="Row">${i}</td>
+                                <td data-label="Column">${j}</td>
+                                <td data-label="Symbol" class="symbol">${cell.symbol}</td>
+                                <td data-label="Data" class="data">${dataStr}</td>
+                            </tr>`;
+                            rowIndex++;
+                        }
+                    }
+                }
+            });
+
+            html += '</table>';
+
+            if (rowIndex === 0) {
+                html += '<p>No values assigned.</p>';
+            }
+
+            symbolValuesDiv.innerHTML = html;
+        }
+
+        /**
+         * Adds a new network with default dimensions to the editor.
+         */
+        function addNetwork() {
+            const newNetwork = new Network(8, 8);
+            networks.push(newNetwork);
+            newNetwork.renderNetwork();
+            renderSymbolValues();
+            saveToHistory();
+        }
+
+        /**
+         * Resizes a network based on user input.
+         * @param {number} id - The ID of the network to resize.
+         */
+        function resizeNetwork(id) {
+            const network = networks.find(n => n.id === id);
+            if (!network) return;
+            const rowsInput = document.getElementById(`rows-${id}`);
+            const colsInput = document.getElementById(`cols-${id}`);
+            const newRows = parseInt(rowsInput.value);
+            const newCols = parseInt(colsInput.value);
+            if (isNaN(newRows) || isNaN(newCols) || newRows < 1 || newCols < 1) {
+                showToast("Rows and columns must be positive numbers.");
+                return;
+            }
+            if (newRows > MAX_ROWS || newCols > MAX_COLS) {
+                showToast(`Cannot resize: exceeds maximum limits (rows <= ${MAX_ROWS}, cols <= ${MAX_COLS}).`);
+                return;
+            }
+            network.resize(newRows, newCols);
+            saveToHistory();
+        }
+
+        /**
+         * Deletes a network or clears it if it's the only one.
+         * @param {number} id - The ID of the network to delete or clear.
+         */
+        function deleteOrClearNetwork(id) {
+            const network = networks.find(n => n.id === id);
+            if (!network) return;
+
+            if (networks.length === 1) {
+                network.clear();
+                showToast("Network cleared. At least one network must remain.");
+                saveToHistory();
+            } else {
+                const indexToDelete = networks.findIndex(n => n.id === id);
+                const containerToRemove = document.getElementById(`network-container-${id}`);
+                if (containerToRemove) containerToRemove.remove();
+                networks.splice(indexToDelete, 1);
+                document.getElementById('networks-container').innerHTML = '';
+                networks.forEach((network, newIndex) => {
+                    network.id = newIndex;
+                    network.createNetworkElement();
+                    network.renderNetwork();
+                });
+                networkCounter = networks.length;
+                renderSymbolValues();
+                saveToHistory();
+            }
+        }
+
+        /**
+         * Hides all open popup menus.
+         */
+        function closeAllMenus() {
+            document.getElementById('symbolMenu').style.display = 'none';
+            document.getElementById('dataTypeMenu').style.display = 'none';
+        }
+
+        /**
+         * Displays a menu for selecting symbols or actions at a cell.
+         * @param {Event} event - The click event triggering the menu.
+         */
+        function showSymbolMenu(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            closeAllMenus();
+            const td = event.currentTarget;
+            const row = parseInt(td.dataset.row);
+            const col = parseInt(td.dataset.col);
+            const networkId = parseInt(td.dataset.networkId);
+            const network = networks.find(n => n.id === networkId);
+            const menu = document.getElementById('symbolMenu');
+            menu.innerHTML = '';
+
+            if (row > 0 && col < network.cols - 1 && network.networkData[row][col].symbol !== 'occupied' && !network.networkData[row][col].bar) {
+                const addBarItem = document.createElement('div');
+                addBarItem.className = 'menu-item';
+                addBarItem.textContent = 'Add Vertical Bar';
+                addBarItem.onclick = () => {
+                    addVerticalBar(networkId, row, col);
+                    menu.style.display = 'none';
+                };
+                menu.appendChild(addBarItem);
+            }
+
+            if (network.networkData[row][col].bar) {
+                const deleteBarItem = document.createElement('div');
+                deleteBarItem.className = 'menu-item';
+                deleteBarItem.textContent = 'Delete Vertical Bar';
+                deleteBarItem.onclick = () => {
+                    deleteVerticalBar(networkId, row, col);
+                    menu.style.display = 'none';
+                };
+                menu.appendChild(deleteBarItem);
+            }
+
+            if (network.networkData[row][col].symbol !== "NOP" && network.networkData[row][col].symbol !== 'occupied') {
+                const deleteItem = document.createElement('div');
+                deleteItem.className = 'menu-item';
+                deleteItem.textContent = 'Delete Symbol';
+                deleteItem.onclick = () => {
+                    placeSymbol(networkId, row, col, 'delete');
+                    menu.style.display = 'none';
+                };
+                menu.appendChild(deleteItem);
+            }
+
+            if (network.networkData[row][col].symbol === "NOP" || network.networkData[row][col].symbol === "CONN") {
+                Object.keys(symbols).filter(name => name !== "NOP").forEach(name => {
+                    const item = document.createElement('div');
+                    item.className = 'menu-item';
+                    item.textContent = name;
+                    item.onclick = () => {
+                        placeSymbolWithValues(networkId, row, col, name);
+                        menu.style.display = 'none';
+                    };
+                    menu.appendChild(item);
+                });
+            }
+
+            const rect = td.getBoundingClientRect();
+            menu.style.left = `${rect.left + window.scrollX}px`;
+            menu.style.top = `${rect.bottom + window.scrollY}px`;
+            menu.style.display = 'block';
+
+            document.addEventListener('click', (e) => {
+                if (!menu.contains(e.target)) menu.style.display = 'none';
+            }, { once: true });
+        }
+
+        /**
+         * Displays a menu for configuring symbol data types and values.
+         * @param {Event} event - The contextmenu event triggering the menu.
+         */
+        function showDataTypeMenu(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            closeAllMenus();
+            const td = event.currentTarget;
+            const row = parseInt(td.dataset.row);
+            const col = parseInt(td.dataset.col);
+            const networkId = parseInt(td.dataset.networkId);
+            const network = networks.find(n => n.id === networkId);
+            const menu = document.getElementById('dataTypeMenu');
+            menu.innerHTML = '';
+
+            if (network.networkData[row][col].symbol === "NOP" || network.networkData[row][col].symbol === 'occupied') return;
+
+            const symbol = symbols[network.networkData[row][col].symbol];
+            const dataEntries = symbol.dataEntries;
+
+            for (let i = 0; i < dataEntries.length; i++) {
+                const entry = dataEntries[i];
+                const valueDiv = document.createElement('div');
+                valueDiv.className = 'value-entry';
+
+                const label = document.createElement('span');
+                label.className = 'value-label';
+                label.textContent = entry.name + ':';
+                valueDiv.appendChild(label);
+
+                const pairDiv = document.createElement('div');
+                pairDiv.className = 'value-pair';
+
+                if (entry.allowedTypes.length === 1) {
+                    const typeText = document.createElement('span');
+                    typeText.textContent = entry.allowedTypes[0];
+                    pairDiv.appendChild(typeText);
+                } else {
+                    const select = document.createElement('select');
+                    entry.allowedTypes.forEach(type => {
+                        const option = document.createElement('option');
+                        option.value = type;
+                        option.textContent = type;
+                        if (type === (network.networkData[row][col].data[i]?.type || entry.allowedTypes[0])) option.selected = true;
+                        select.appendChild(option);
+                    });
+                    select.onchange = () => {
+                        network.networkData[row][col].data[i].type = select.value;
+                        network.renderNetwork();
+                        renderSymbolValues();
+                        saveToHistory();
+                    };
+                    pairDiv.appendChild(select);
+                }
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = network.networkData[row][col].data[i]?.value || '0';
+                input.oninput = () => {
+                    network.networkData[row][col].data[i].value = input.value;
+                    network.renderNetwork();
+                    renderSymbolValues();
+                    saveToHistory();
+                };
+
+                pairDiv.appendChild(input);
+                valueDiv.appendChild(pairDiv);
+                menu.appendChild(valueDiv);
+            }
+
+            const rect = td.getBoundingClientRect();
+            menu.style.left = `${rect.left + window.scrollX}px`;
+            menu.style.top = `${rect.bottom + window.scrollY}px`;
+            menu.style.display = 'block';
+
+            document.addEventListener('click', (e) => {
+                if (!menu.contains(e.target)) menu.style.display = 'none';
+            }, { once: true });
+        }
+
+        /**
+         * Automatically fills a row with "CONN" symbols if it contains functional symbols.
+         * @param {Network} network - The network to modify.
+         * @param {number} row - The row index to auto-complete.
+         */
+        function autoCompleteRow(network, row) {
+            const hasFunctionalSymbol = network.networkData[row].some(cell => cell.symbol !== "NOP" && cell.symbol !== "CONN");
+            if (hasFunctionalSymbol) {
+                for (let j = 0; j < network.cols; j++) {
+                    if (network.networkData[row][j].symbol === "NOP") {
+                        network.networkData[row][j].symbol = "CONN";
+                        network.networkData[row][j].data = [];
+                    }
+                }
+            }
+        }
+
+        /**
+         * Places a symbol with default data values in a cell and manages connections.
+         * @param {number} networkId - The ID of the network.
+         * @param {number} row - The row index.
+         * @param {number} col - The column index.
+         * @param {string} symbolName - The name of the symbol to place.
+         */
+        function placeSymbolWithValues(networkId, row, col, symbolName) {
+            const network = networks.find(n => n.id === networkId);
+            const symbol = symbols[symbolName];
+            if (row + symbol.cells > network.rows) {
+                showToast("Not enough rows to place this symbol.");
+                return;
+            }
+            let canPlace = true;
+            for (let i = 0; i < symbol.cells && row + i < network.rows; i++) {
+                if (network.networkData[row + i][col].symbol !== "NOP" && network.networkData[row + i][col].symbol !== "CONN") {
+                    canPlace = false;
+                    break;
+                }
+            }
+            if (canPlace) {
+                const hasBar = network.networkData[row][col].bar;
+                for (let i = 0; i < symbol.cells && row + i < network.rows; i++) {
+                    network.networkData[row + i][col].symbol = i === 0 ? symbolName : 'occupied';
+                    network.networkData[row + i][col].bar = i === 0 ? hasBar : false;
+                    if (i === 0) {
+                        network.networkData[row + i][col].data = symbol.dataEntries.map(entry => ({
+                            name: entry.name,
+                            type: entry.allowedTypes[0],
+                            value: '0'
+                        }));
+                    } else {
+                        network.networkData[row + i][col].data = [];
+                    }
+                }
+
+                if (symbol.cells === 1) {
+                    autoCompleteRow(network, row);
+                } else {
+                    for (let i = 0; i < symbol.cells && row + i < network.rows; i++) {
+                        const r = row + i;
+                        const pin = symbol.pins[i];
+                        if (pin.left) {
+                            for (let j = 0; j < col; j++) {
+                                if (network.networkData[r][j].symbol === "NOP") {
+                                    network.networkData[r][j].symbol = "CONN";
+                                    network.networkData[r][j].data = [];
+                                }
+                            }
+                        } else {
+                            let j = col - 1;
+                            while (j >= 0) {
+                                if (network.networkData[r][j].symbol === "CONN") {
+                                    network.networkData[r][j].symbol = "NOP";
+                                    network.networkData[r][j].data = [];
+                                } else if (network.networkData[r][j].symbol !== "NOP") {
+                                    break;
+                                }
+                                j--;
+                            }
+                        }
+                        if (pin.right) {
+                            for (let j = col + 1; j < network.cols; j++) {
+                                if (network.networkData[r][j].symbol === "NOP") {
+                                    network.networkData[r][j].symbol = "CONN";
+                                    network.networkData[r][j].data = [];
+                                }
+                            }
+                        }
+                    }
+                }
+
+                network.renderNetwork();
+                renderSymbolValues();
+                saveToHistory();
+            } else {
+                showToast("Cannot place symbol: space is already occupied.");
+            }
+        }
+
+        /**
+         * Places or deletes a symbol in a cell.
+         * @param {number} networkId - The ID of the network.
+         * @param {number} row - The row index.
+         * @param {number} col - The column index.
+         * @param {string} symbolName - The symbol name or 'delete' to remove the symbol.
+         */
+        function placeSymbol(networkId, row, col, symbolName) {
+            const network = networks.find(n => n.id === networkId);
+            if (symbolName === 'delete') {
+                if (network.networkData[row][col].symbol !== "NOP" && network.networkData[row][col].symbol !== 'occupied') {
+                    const cells = symbols[network.networkData[row][col].symbol].cells;
+                    for (let i = 0; i < cells && row + i < network.rows; i++) {
+                        network.networkData[row + i][col].symbol = "NOP";
+                        network.networkData[row + i][col].bar = i === 0 ? network.networkData[row][col].bar : false;
+                        network.networkData[row + i][col].data = [];
+                    }
+                    network.renderNetwork();
+                    renderSymbolValues();
+                    saveToHistory();
+                }
+            }
+        }
+
+        /**
+         * Adds a vertical bar to connect cells vertically.
+         * @param {number} networkId - The ID of the network.
+         * @param {number} row - The row index.
+         * @param {number} col - The column index.
+         */
+        function addVerticalBar(networkId, row, col) {
+            const network = networks.find(n => n.id === networkId);
+            if (row < 1) {
+                showToast("Cannot place vertical bar in the top row.");
+                return;
+            }
+            if (col >= network.cols - 1) {
+                showToast("Cannot place vertical bar in the last column.");
+                return;
+            }
+            if (network.networkData[row][col].symbol === 'occupied') {
+                showToast("Cannot place vertical bar on an occupied cell.");
+                return;
+            }
+            network.networkData[row][col].bar = true;
+            network.renderNetwork();
+            renderSymbolValues();
+            saveToHistory();
+        }
+
+        /**
+         * Removes a vertical bar from a cell.
+         * @param {number} networkId - The ID of the network.
+         * @param {number} row - The row index.
+         * @param {number} col - The column index.
+         */
+        function deleteVerticalBar(networkId, row, col) {
+            const network = networks.find(n => n.id === networkId);
+            network.networkData[row][col].bar = false;
+            network.renderNetwork();
+            renderSymbolValues();
+            saveToHistory();
+        }
+
+        /**
+         * Saves all networks to a JSON file for download.
+         */
+        function saveNetworks() {
+            const data = networks.map(n => ({
+                id: n.id,
+                rows: n.rows,
+                cols: n.cols,
+                networkData: n.networkData
+            }));
+            const formattedData = JSON.stringify(data, null, 2);
+            const blob = new Blob([formattedData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ladder_networks.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        /**
+         * Validates and sanitizes network data loaded from a file.
+         * @param {Array} networkData - The loaded network data array.
+         * @param {number} rows - Number of rows in the network.
+         * @param {number} cols - Number of columns in the network.
+         * @returns {Array} Sanitized network data.
+         */
+        function validateNetworkData(networkData, rows, cols) {
+            const validatedData = [];
+            for (let i = 0; i < rows; i++) {
+                const row = [];
+                for (let j = 0; j < cols; j++) {
+                    let cell = networkData[i]?.[j];
+                    if (typeof cell !== 'object' || cell === null) {
+                        cell = { symbol: "NOP", bar: false, data: [] };
+                    }
+                    if (typeof cell.symbol !== 'string' || !symbols[cell.symbol]) {
+                        cell.symbol = "NOP";
+                    }
+                    cell.bar = !!cell.bar;
+                    if (!Array.isArray(cell.data)) {
+                        cell.data = [];
+                    }
+                    if (cell.symbol !== "NOP" && cell.symbol !== "occupied") {
+                        const symbolDef = symbols[cell.symbol];
+                        const expectedDataEntries = symbolDef.dataEntries;
+                        const newData = [];
+                        expectedDataEntries.forEach(entry => {
+                            const loadedEntry = cell.data.find(d => d.name === entry.name && typeof d.type === 'string' && typeof d.value === 'string');
+                            if (loadedEntry && entry.allowedTypes.includes(loadedEntry.type)) {
+                                newData.push({ name: entry.name, type: loadedEntry.type, value: loadedEntry.value });
+                            } else {
+                                newData.push({ name: entry.name, type: entry.allowedTypes[0], value: '0' });
+                            }
+                        });
+                        cell.data = newData;
+                    } else {
+                        cell.data = [];
+                    }
+                    row.push(cell);
+                }
+                validatedData.push(row);
+            }
+            return validatedData;
+        }
+
+        /**
+         * Loads networks from a JSON file selected by the user.
+         * @param {Event} event - The file input change event.
+         */
+        function loadNetworks(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('File is too large to process.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                try {
+                    const data = JSON.parse(text);
+                    if (!Array.isArray(data)) {
+                        throw new Error('Invalid network data format: not an array');
+                    }
+                    if (data.length > MAX_NETWORKS) {
+                        showToast(`Only the first ${MAX_NETWORKS} networks will be loaded.`);
+                        data = data.slice(0, MAX_NETWORKS);
+                    }
+                    networks = [];
+                    document.getElementById('networks-container').innerHTML = '';
+                    document.getElementById('symbolValues').innerHTML = '';
+                    networkCounter = 0;
+                    data.forEach(n => {
+                        if (!Number.isInteger(n.rows) || n.rows < 1 || !Number.isInteger(n.cols) || n.cols < 1) {
+                            throw new Error('Invalid network dimensions');
+                        }
+                        if (n.rows > MAX_ROWS || n.cols > MAX_COLS) {
+                            throw new Error(`Network exceeds size limits: rows=${n.rows}, cols=${n.cols}`);
+                        }
+                        const network = new Network(n.rows, n.cols);
+                        network.networkData = validateNetworkData(n.networkData, n.rows, n.cols);
+                        networks.push(network);
+                        network.renderNetwork();
+                    });
+                    networks.forEach((n, index) => {
+                        n.id = index;
+                    });
+                    renderSymbolValues();
+                    saveToHistory();
+                } catch (error) {
+                    showToast('Error parsing file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        /**
+         * Shows a temporary toast message on the screen.
+         * @param {string} message - The message to display.
+         */
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.background = '#333';
+            toast.style.color = 'white';
+            toast.style.padding = '10px 20px';
+            toast.style.borderRadius = '5px';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        /**
+         * Saves the current state of all networks to the history stack.
+         */
+        function saveToHistory() {
+            const state = JSON.stringify(networks.map(n => ({
+                id: n.id,
+                rows: n.rows,
+                cols: n.cols,
+                networkData: n.networkData.map(row => row.map(cell => ({ ...cell })))
+            })));
+            if (historyIndex < history.length - 1) {
+                history = history.slice(0, historyIndex + 1);
+            }
+            history.push(state);
+            historyIndex++;
+        }
+
+        /**
+         * Reverts to the previous state in the history stack.
+         */
+        function undo() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                restoreFromHistory();
+            }
+        }
+
+        /**
+         * Advances to the next state in the history stack.
+         */
+        function redo() {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                restoreFromHistory();
+            }
+        }
+
+        /**
+         * Restores the network state from the current history index.
+         */
+        function restoreFromHistory() {
+            const state = JSON.parse(history[historyIndex]);
+            networks = [];
+            document.getElementById('networks-container').innerHTML = '';
+            document.getElementById('symbolValues').innerHTML = '';
+            state.forEach(n => {
+                const network = new Network(n.rows, n.cols, n.id);
+                network.networkData = n.networkData;
+                networks.push(network);
+                network.renderNetwork();
+            });
+            if (networks.length > 0) {
+                const maxId = Math.max(...networks.map(n => n.id));
+                networkCounter = maxId + 1;
+            } else {
+                networkCounter = 0;
+            }
+            renderSymbolValues();
+        }
+
+        // Event listener for toggling blinking on symbol value rows and corresponding cells
+        document.getElementById('symbolValues').addEventListener('click', function(event) {
+            const row = event.target.closest('tr.symbol-row');
+            if (row) {
+                const cells = row.cells;
+                const networkId = parseInt(cells[0].textContent);
+                const rowIndex = parseInt(cells[1].textContent);
+                const colIndex = parseInt(cells[2].textContent);
+                const cell = document.querySelector(`#network-${networkId} td[data-row="${rowIndex}"][data-col="${colIndex}"]`);
+                if (cell) {
+                    if (cell.classList.contains('blinking')) {
+                        cell.classList.remove('blinking');
+                        row.classList.remove('blinking');
+                    } else {
+                        const previousBlinkingCell = document.querySelector('td.blinking');
+                        if (previousBlinkingCell) {
+                            previousBlinkingCell.classList.remove('blinking');
+                        }
+                        const previousBlinkingRow = document.querySelector('tr.blinking');
+                        if (previousBlinkingRow) {
+                            previousBlinkingRow.classList.remove('blinking');
+                        }
+                        cell.classList.add('blinking');
+                        row.classList.add('blinking');
+                    }
+                }
+            }
+        });
+
+        // Event listener to stop blinking when clicking outside the symbol values table
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('#symbolValues')) {
+                const blinkingCell = document.querySelector('td.blinking');
+                if (blinkingCell) {
+                    blinkingCell.classList.remove('blinking');
+                }
+                const blinkingRow = document.querySelector('tr.blinking');
+                if (blinkingRow) {
+                    blinkingRow.classList.remove('blinking');
+                }
+            }
+        });
+
+        // Initialize the editor with a default network on page load
+        window.onload = function() {
+            addNetwork();
+        };
+    </script>
+</body>
+</html>
