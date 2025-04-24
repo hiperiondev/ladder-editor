@@ -325,6 +325,10 @@
             50% { background-color: #ffcccc; }
             100% { background-color: #fff; }
         }
+        /* Style for cells with state 1 from external process */
+        td.active {
+            background-color: yellow;
+        }
     </style>
 </head>
 <body>
@@ -336,6 +340,7 @@
         <button onclick="document.getElementById('loadFile').click()">Load</button>
         <button onclick="undo()">Undo</button>
         <button onclick="redo()">Redo</button>
+        <div id="ws-indicator" style="display: inline-block; width: 20px; height: 20px; border-radius: 50%; background-color: red; margin-left: 10px;"></div>
     </div>
     <!-- Container for displaying all network diagrams -->
     <div id="networks-container"></div>
@@ -2389,6 +2394,71 @@
         // Initialize the editor with a default network on page load
         window.onload = function() {
             addNetwork();
+        };
+
+        // WebSocket functionality
+        const ws = new WebSocket("ws://localhost:8080");
+        let wsStatus = "disconnected";
+
+        function updateIndicator() {
+            const indicator = document.getElementById('ws-indicator');
+            if (wsStatus === "disconnected") {
+                indicator.style.backgroundColor = "red";
+            } else if (wsStatus === "connected_not_running") {
+                indicator.style.backgroundColor = "yellow";
+            } else if (wsStatus === "connected_running") {
+                indicator.style.backgroundColor = "green";
+            }
+        }
+
+        function setAllCellsDefault() {
+            document.querySelectorAll('td.active').forEach(cell => cell.classList.remove('active'));
+        }
+
+        function applyCellStates(cellStates) {
+            setAllCellsDefault();
+            cellStates.forEach(cs => {
+                if (cs.state === 1) {
+                    const cell = document.querySelector(`#network-${cs.networkId} td[data-row="${cs.row}"][data-col="${cs.col}"]`);
+                    if (cell) {
+                        cell.classList.add('active');
+                    }
+                }
+            });
+        }
+
+        ws.onopen = function() {
+            wsStatus = "connected_not_running";
+            updateIndicator();
+        };
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.status) {
+                if (data.status === "running") {
+                    wsStatus = "connected_running";
+                    updateIndicator();
+                    if (data.cell_states) {
+                        applyCellStates(data.cell_states);
+                    }
+                } else if (data.status === "not_running") {
+                    wsStatus = "connected_not_running";
+                    updateIndicator();
+                    setAllCellsDefault();
+                }
+            }
+        };
+
+        ws.onclose = function() {
+            wsStatus = "disconnected";
+            updateIndicator();
+            setAllCellsDefault();
+        };
+
+        ws.onerror = function() {
+            wsStatus = "disconnected";
+            updateIndicator();
+            setAllCellsDefault();
         };
     </script>
 </body>
