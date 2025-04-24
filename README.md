@@ -15,8 +15,27 @@ Features:
     Easy change symbols in code (add or modify)
     Save and load in JSON format
     Undo/Redo function
-    WebSocket for comunnication with external runtime
+    WebSocket for comunnication with external runtime    
+    
 
 Known issues:
 
     Does not always scale correctly on mobile devices
+
+--------------------------------
+The expected WebSocket message format is a JSON object like:
+```json
+{
+  "status": "running",
+  "cell_states": [
+    { "networkId": 0, "row": 2, "col": 3, "state": 1 },
+    { "networkId": 0, "row": 4, "col": 5, "state": 0 },
+    ...
+  ]
+}
+```
+or:
+```json
+{ "status": "not_running" }
+```
+If the message lacks a status field or has an unrecognized status, it is ignored.
