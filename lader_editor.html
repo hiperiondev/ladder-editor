@@ -1362,6 +1362,58 @@
             }
         };
 
+        // Validation functions
+        function isValidUInt32(str) {
+            const num = parseInt(str, 10);
+            return /^\d+$/.test(str) && !isNaN(num) && num >= 0 && num <= 4294967295;
+        }
+
+        function isValidQorI(value) {
+            const parts = value.split('.');
+            if (parts.length < 1 || parts.length > 3) return false;
+            return parts.every(part => isValidUInt32(part));
+        }
+
+        function isValidReal(value) {
+            return /^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/.test(value);
+        }
+
+        function isValidCSTR(value) {
+            return true; // Allow any string
+        }
+
+        function validateValue(type, value) {
+            switch (type) {
+                case "NONE":
+                case "M":
+                case "Cd":
+                case "Cr":
+                case "Td":
+                case "Tr":
+                case "IW":
+                case "QW":
+                case "C":
+                case "T":
+                case "D":
+                case "MS":
+                case "10MS":
+                case "100MS":
+                case "SEC":
+                case "MIN":
+                case "K":
+                    return isValidUInt32(value);
+                case "Q":
+                case "I":
+                    return isValidQorI(value);
+                case "CSTR":
+                    return isValidCSTR(value);
+                case "REAL":
+                    return isValidReal(value);
+                default:
+                    return false;
+            }
+        }
+
         // Constants defining maximum limits for network dimensions and count
         const MAX_ROWS = 100;
         const MAX_COLS = 100;
@@ -1820,7 +1872,7 @@
         }
 
         /**
-         * Displays a menu for configuring symbol data types and values.
+         * Displays a menu for configuring symbol data types and values with input validation.
          * @param {Event} event - The contextmenu event triggering the menu.
          */
         function showDataTypeMenu(event) {
@@ -1839,6 +1891,7 @@
 
             const symbol = symbols[network.networkData[row][col].symbol];
             const dataEntries = symbol.dataEntries;
+            const inputs = [];
 
             for (let i = 0; i < dataEntries.length; i++) {
                 const entry = dataEntries[i];
@@ -1853,42 +1906,69 @@
                 const pairDiv = document.createElement('div');
                 pairDiv.className = 'value-pair';
 
+                let typeSelect = null;
                 if (entry.allowedTypes.length === 1) {
                     const typeText = document.createElement('span');
                     typeText.textContent = entry.allowedTypes[0];
                     pairDiv.appendChild(typeText);
                 } else {
-                    const select = document.createElement('select');
+                    typeSelect = document.createElement('select');
                     entry.allowedTypes.forEach(type => {
                         const option = document.createElement('option');
                         option.value = type;
                         option.textContent = type;
                         if (type === (network.networkData[row][col].data[i]?.type || entry.allowedTypes[0])) option.selected = true;
-                        select.appendChild(option);
+                        typeSelect.appendChild(option);
                     });
-                    select.onchange = () => {
-                        network.networkData[row][col].data[i].type = select.value;
-                        network.renderNetwork();
-                        renderSymbolValues();
-                        saveToHistory();
-                    };
-                    pairDiv.appendChild(select);
+                    pairDiv.appendChild(typeSelect);
                 }
 
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.value = network.networkData[row][col].data[i]?.value || '0';
-                input.oninput = () => {
-                    network.networkData[row][col].data[i].value = input.value;
-                    network.renderNetwork();
-                    renderSymbolValues();
-                    saveToHistory();
-                };
-
                 pairDiv.appendChild(input);
                 valueDiv.appendChild(pairDiv);
                 menu.appendChild(valueDiv);
+
+                inputs.push({
+                    input: input,
+                    typeSelect: typeSelect,
+                    dataIndex: i
+                });
             }
+
+            // Add Confirm button
+            const confirmButton = document.createElement('button');
+            confirmButton.textContent = 'Confirm';
+            confirmButton.onclick = () => {
+                let allValid = true;
+                const newData = [];
+                inputs.forEach(({ input, typeSelect, dataIndex }) => {
+                    const type = typeSelect ? typeSelect.value : dataEntries[dataIndex].allowedTypes[0];
+                    const value = input.value;
+                    if (!validateValue(type, value)) {
+                        allValid = false;
+                        input.style.border = '1px solid red';
+                    } else {
+                        input.style.border = '';
+                        newData.push({
+                            name: dataEntries[dataIndex].name,
+                            type: type,
+                            value: value
+                        });
+                    }
+                });
+                if (allValid) {
+                    network.networkData[row][col].data = newData;
+                    network.renderNetwork();
+                    renderSymbolValues();
+                    saveToHistory();
+                    closeAllMenus();
+                } else {
+                    showToast('Some values are invalid. Please correct them.');
+                }
+            };
+            menu.appendChild(confirmButton);
 
             const rect = td.getBoundingClientRect();
             menu.style.left = `${rect.left + window.scrollX}px`;
