@@ -1434,6 +1434,8 @@
                 colsLabel.appendChild(colsInput);
 
                 const resizeButton = document.createElement('button');
+                resizeButton.textContent = 'Resize';
+                resizeButton.onclick = () => resizeNetwork(this.id);
                 const deleteButton = document.createElement('button');
                 deleteButton.className = 'delete-button';
                 deleteButton.textContent = 'Delete';
@@ -2100,7 +2102,7 @@
                     if (!Array.isArray(cell.data)) {
                         cell.data = [];
                     }
-                    if (cell.symbol !== "NOP" && cell.symbol !== "occupied") {
+                    if (cell.symbol !== "NOP" && cell.symbol !== "occupied" && symbols[cell.symbol]) {
                         const symbolDef = symbols[cell.symbol];
                         const expectedDataEntries = symbolDef.dataEntries;
                         const newData = [];
