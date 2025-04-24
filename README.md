@@ -15,6 +15,7 @@ Features:
     Easy change symbols in code (add or modify)
     Save and load in JSON format
     Undo/Redo function
+    WebSocket for comunnication with external runtime
 
 Known issues:
 
