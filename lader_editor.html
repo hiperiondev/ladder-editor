@@ -484,7 +484,7 @@
                         ]
                     }
                 ],
-                svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TON</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TON</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/>< text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
                 pins: [
                     { left: true, right: true },
                     { left: false, right: true }
@@ -560,7 +560,7 @@
                 cells: 2,
                 dataEntries: [
                     {
-                        name: "value1 Jubal",
+                        name: "value1",
                         allowedTypes: ["C"]
                     },
                     {
@@ -640,7 +640,7 @@
                         ]
                     }
                 ],
-                svg: `<svg viewBox="0 0 60 180"><rect x="10" y="10" width="40" height="160" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size.construct:12" text-anchor="middle" fill="green">SUB</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/><text x="35" y="160" font-size="10" fill="green">Q2</text><line x1="50" y1="150" x2="60" y2="150" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 180"><rect x="10" y="10" width="40" height="160" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SUB</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/><text x="35" y="160" font-size="10" fill="green">Q2</text><line x1="50" y1="150" x2="60" y2="150" stroke="green" stroke-width="2"/></svg>`,
                 pins: [
                     { left: true, right: true },
                     { left: false, right: true },
@@ -1353,6 +1353,7 @@
         let history = [];
         let historyIndex = -1;
         let currentMenu = null;
+        let sameDimensionsFlag = false;
 
         class Network {
             constructor(rows, cols, id = null) {
@@ -1630,7 +1631,13 @@
         }
 
         function addNetwork() {
-            const newNetwork = new Network(8, 8);
+            let rows = 8;
+            let cols = 8;
+            if (sameDimensionsFlag && networks.length > 0) {
+                rows = networks[0].rows;
+                cols = networks[0].cols;
+            }
+            const newNetwork = new Network(rows, cols);
             networks.push(newNetwork);
             newNetwork.renderNetwork();
             renderSymbolValues();
@@ -1638,8 +1645,6 @@
         }
 
         function resizeNetwork(id) {
-            const network = networks.find(n => n.id === id);
-            if (!network) return;
             const rowsInput = document.getElementById(`rows-${id}`);
             const colsInput = document.getElementById(`cols-${id}`);
             const newRows = parseInt(rowsInput.value);
@@ -1652,7 +1657,16 @@
                 showToast(`Cannot resize: exceeds maximum limits (rows <= ${MAX_ROWS}, cols <= ${MAX_COLS}).`);
                 return;
             }
-            network.resize(newRows, newCols);
+            if (sameDimensionsFlag) {
+                networks.forEach(network => {
+                    network.resize(newRows, newCols);
+                });
+            } else {
+                const network = networks.find(n => n.id === id);
+                if (network) {
+                    network.resize(newRows, newCols);
+                }
+            }
             saveToHistory();
         }
 
@@ -2253,13 +2267,16 @@
         }
 
         ws.onopen = function() {
+            ws.send(JSON.stringify({ action: "get_flag" }));
             wsStatus = "connected_not_running";
             updateIndicator();
         };
 
         ws.onmessage = function(event) {
             const data = JSON.parse(event.data);
-            if (data.action === "load_response") {
+            if (data.flag === "sameDimensions") {
+                sameDimensionsFlag = data.value;
+            } else if (data.action === "load_response") {
                 const loadedNetworks = data.data;
                 networks = [];
                 document.getElementById('networks-container').innerHTML = '';
