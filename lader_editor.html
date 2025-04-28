@@ -5,48 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ladder PLC Editor</title>
     <style>
-        /* Root variables defining cell size, label width, and controls height for consistent layout */
         :root {
             --cell-size: 60px;
             --label-width: 40px;
             --controls-height: 60px;
         }
-        /* Responsive design adjustments for mobile devices */
         @media (max-width: 600px) {
             :root {
                 --cell-size: 40px;
                 --label-width: 30px;
                 --controls-height: 50px;
             }
-            /* Hide table headers in symbol values on small screens */
             #symbolValues th {
                 display: none;
             }
         }
-        /* Base styling for the body of the editor */
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
             margin: 20px;
             overflow-x: auto;
         }
-        /* Styling for the main controls section */
         #controls {
             margin-bottom: 20px;
         }
-        /* Flexbox container for arranging network diagrams vertically */
         #networks-container {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
-        /* Wrapper for each network diagram, allowing relative positioning of child elements */
         .network-wrapper {
             position: relative;
             display: block;
             margin-bottom: 20px;
         }
-        /* Styling for the network table grid */
         .network-table {
             border-collapse: collapse;
             background-color: #fff;
@@ -56,7 +48,6 @@
             margin-bottom: 40px;
             border: 1px solid #ddd;
         }
-        /* Styling for individual cells within the network table */
         .network-table td {
             width: var(--cell-size);
             height: var(--cell-size);
@@ -70,11 +61,9 @@
             box-sizing: border-box;
             background-color: #fff;
         }
-        /* Hover effect for table cells to indicate interactivity */
         .network-table td:hover {
             background-color: #f5f5f5;
         }
-        /* Styling for SVG elements within table cells */
         .network-table td svg {
             width: 100%;
             height: 100%;
@@ -83,14 +72,12 @@
             object-fit: contain;
             preserveAspectRatio: meet;
         }
-        /* Styling for multi-cell SVGs spanning multiple rows */
         .multi-cell-svg {
             position: absolute;
             top: 0;
             left: 0;
             width: var(--cell-size);
         }
-        /* Base styling for row and column labels */
         .row-label, .col-label {
             font-size: 14px;
             font-weight: bold;
@@ -98,7 +85,6 @@
             position: absolute;
             pointer-events: none;
         }
-        /* Specific positioning for row labels */
         .row-label {
             width: var(--label-width);
             text-align: right;
@@ -107,14 +93,12 @@
             top: calc(var(--controls-height) + 20px + var(--row-index) * var(--cell-size) + (var(--cell-size) / 2));
             transform: translateY(-50%);
         }
-        /* Specific positioning for column labels */
         .col-label {
             width: var(--cell-size);
             text-align: center;
             top: calc(var(--controls-height) + 20px - 3px - 14px);
             left: calc(var(--label-width) + var(--col-index) * var(--cell-size));
         }
-        /* Styling for the symbol values display section */
         #symbolValues {
             margin-top: 20px;
             background-color: #fff;
@@ -122,38 +106,32 @@
             border-radius: 8px;
             box-shadow: 0 0 5px rgba(0,0,0,0.1);
         }
-        /* Styling for the table within the symbol values section */
         #symbolValues table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
-        /* Styling for table headers and cells in symbol values */
         #symbolValues th, #symbolValues td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
-        /* Header styling for symbol values table */
         #symbolValues th {
             background-color: #0288d1;
             color: white;
         }
-        /* Alternating row colors for data cells in symbol values */
         #symbolValues tr:nth-child(even) td.data {
             background-color: #fffde7;
         }
         #symbolValues tr:nth-child(odd) td.data {
             background-color: #f5f5f5;
         }
-        /* Specific styling for network ID and symbol cells */
         #symbolValues td.network-id {
             background-color: #e0f7fa;
         }
         #symbolValues td.symbol {
             background-color: #e6ffe6;
         }
-        /* Styling for popup menus for symbol and data type selection */
         #symbolMenu, #dataTypeMenu {
             position: absolute;
             background-color: #fff;
@@ -164,7 +142,6 @@
             display: none;
             min-width: 150px;
         }
-        /* Styling for menu items */
         .menu-item {
             padding: 5px 10px;
             cursor: pointer;
@@ -172,7 +149,6 @@
         .menu-item:hover {
             background-color: #e0e0e0;
         }
-        /* Styling for data entry fields in data type menu */
         .value-entry {
             margin-bottom: 10px;
         }
@@ -189,7 +165,6 @@
             margin-right: 5px;
             font-size: 12px;
         }
-        /* General button styling */
         button {
             padding: 5px 10px;
             margin-right: 5px;
@@ -207,13 +182,11 @@
         .delete-button:hover {
             background-color: #cc0000;
         }
-        /* Styling for input fields */
         input {
             padding: 5px;
             margin-right: 10px;
             width: 60px;
         }
-        /* Styling for network-specific controls */
         .network-controls {
             position: absolute;
             top: 0;
@@ -223,7 +196,6 @@
             padding: 5px 0;
             z-index: 10;
         }
-        /* Styling for network labels above each network */
         .network-label {
             position: absolute;
             top: -20px;
@@ -234,12 +206,10 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        /* Styling for vertical bars connecting cells */
         .vertical-bar {
             position: absolute;
             z-index: 100;
         }
-        /* Mobile-specific adjustments for labels and inputs */
         @media (max-width: 600px) {
             .row-label, .col-label {
                 font-size: 12px;
@@ -257,7 +227,6 @@
             .network-label {
                 width: 120px;
             }
-            /* Responsive table layout for symbol values on small screens */
             #symbolValues table {
                 font-size: 12px;
             }
@@ -292,7 +261,6 @@
                 word-wrap: break-word;
             }
         }
-        /* Blinking animation for highlighting cells and rows */
         .blinking {
             animation: backgroundBlink 1s infinite;
         }
@@ -325,57 +293,46 @@
             50% { background-color: #ffcccc; }
             100% { background-color: #fff; }
         }
-        /* Style for cells with state 1 from external process */
         td.active {
             background-color: yellow;
         }
     </style>
 </head>
 <body>
-    <!-- Main controls section with buttons for adding networks, saving, loading, undoing, and redoing -->
     <div id="controls">
         <button onclick="addNetwork()">Add Network</button>
         <button onclick="saveNetworks()">Save</button>
         <input type="file" id="loadFile" accept=".json" style="display: none;" onchange="loadNetworks(event)">
-        <button onclick="document.getElementById('loadFile').click()">Load</button>
+        <button onclick="initiateLoad()">Load</button>
         <button onclick="undo()">Undo</button>
         <button onclick="redo()">Redo</button>
         <div id="ws-indicator" style="display: inline-block; width: 20px; height: 20px; border-radius: 50%; background-color: red; margin-left: 10px;"></div>
     </div>
-    <!-- Container for displaying all network diagrams -->
     <div id="networks-container"></div>
-    <!-- Popup menu for selecting symbols to place in the network -->
     <div id="symbolMenu"></div>
-    <!-- Popup menu for configuring data types and values for symbols -->
     <div id="dataTypeMenu"></div>
-    <!-- Section displaying a table of symbol values across all networks -->
     <div id="symbolValues"></div>
 
     <script>
-        // Array of valid data types for symbol properties
         const dataTypes = [
             "NONE", "M", "Q", "I", "Cd", "Cr", "Td", "Tr", "IW", "QW", "C", "T",
             "D", "CSTR", "REAL", "MS", "10MS", "100MS",
             "SEC", "MIN", "K"
         ];
 
-        // Object defining ladder logic symbols with their properties and SVG representations
         const symbols = {
-            // No operation, does nothing in the ladder logic
             "NOP": {
                 cells: 1,
                 dataEntries: [],
                 svg: `<svg viewBox="0 0 60 60"><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NOP</text></svg>`,
                 pins: [{ left: false, right: false }]
             },
-            // Connection, represents a wire connecting elements
             "CONN": {
                 cells: 1,
                 dataEntries: [],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Negation, inverts the input signal
             "NEG": {
                 cells: 1,
                 dataEntries: [
@@ -387,7 +344,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NEG</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Normally Open contact, passes signal when input is true
             "NO": {
                 cells: 1,
                 dataEntries: [
@@ -408,7 +364,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Normally Closed contact, passes signal when input is false
             "NC": {
                 cells: 1,
                 dataEntries: [
@@ -429,7 +384,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="40" x2="40" y2="20" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Rising Edge detector, triggers on input transition from false to true
             "RE": {
                 cells: 1,
                 dataEntries: [
@@ -450,7 +404,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="30" y="35" font-size="12" text-anchor="middle" fill="green">P</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Falling Edge detector, triggers on input transition from true to false
             "FE": {
                 cells: 1,
                 dataEntries: [
@@ -471,7 +424,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="30" y="35" font-size="12" text-anchor="middle" fill="green">N</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Output coil, activates an output when energized
             "COIL": {
                 cells: 1,
                 dataEntries: [
@@ -486,7 +438,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Latch coil (set), sets an output to true when energized
             "COILL": {
                 cells: 1,
                 dataEntries: [
@@ -501,7 +452,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="27" y="35" font-size="12" text-anchor="middle" fill="green">S</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Unlatch coil (reset), sets an output to false when energized
             "COILU": {
                 cells: 1,
                 dataEntries: [
@@ -516,7 +466,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="27" y="35" font-size="12" text-anchor="middle" fill="green">R</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // On-delay timer, delays turning on an output
             "TON": {
                 cells: 2,
                 dataEntries: [
@@ -541,7 +490,6 @@
                     { left: false, right: true }
                 ]
             },
-            // Off-delay timer, delays turning off an output
             "TOF": {
                 cells: 2,
                 dataEntries: [
@@ -566,7 +514,6 @@
                     { left: false, right: true }
                 ]
             },
-            // Pulse timer, generates a pulse of specified duration
             "TP": {
                 cells: 2,
                 dataEntries: [
@@ -591,7 +538,6 @@
                     { left: false, right: true }
                 ]
             },
-            // Up counter, increments a counter on each rising edge
             "CTU": {
                 cells: 2,
                 dataEntries: [
@@ -610,12 +556,11 @@
                     { left: true, right: true }
                 ]
             },
-            // Down counter, decrements a counter on each rising edge
             "CTD": {
                 cells: 2,
                 dataEntries: [
                     {
-                        name: "value1",
+                        name: "value1 Jubal",
                         allowedTypes: ["C"]
                     },
                     {
@@ -629,7 +574,6 @@
                     { left: true, right: true }
                 ]
             },
-            // Move data from one location to another
             "MOVE": {
                 cells: 1,
                 dataEntries: [
@@ -659,7 +603,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MOVE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Subtract two values and store the result
             "SUB": {
                 cells: 3,
                 dataEntries: [
@@ -697,14 +640,13 @@
                         ]
                     }
                 ],
-                svg: `<svg viewBox="0 0 60 180"><rect x="10" y="10" width="40" height="160" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SUB</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/><text x="35" y="160" font-size="10" fill="green">Q2</text><line x1="50" y1="150" x2="60" y2="150" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 180"><rect x="10" y="10" width="40" height="160" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size.construct:12" text-anchor="middle" fill="green">SUB</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/><text x="35" y="160" font-size="10" fill="green">Q2</text><line x1="50" y1="150" x2="60" y2="150" stroke="green" stroke-width="2"/></svg>`,
                 pins: [
                     { left: true, right: true },
                     { left: false, right: true },
                     { left: false, right: true }
                 ]
             },
-            // Add two values and store the result
             "ADD": {
                 cells: 1,
                 dataEntries: [
@@ -745,7 +687,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ADD</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Multiply two values and store the result
             "MUL": {
                 cells: 1,
                 dataEntries: [
@@ -786,7 +727,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MUL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Divide two values and store the result
             "DIV": {
                 cells: 2,
                 dataEntries: [
@@ -830,7 +770,6 @@
                     { left: false, right: true }
                 ]
             },
-            // Modulo operation, computes remainder of division
             "MOD": {
                 cells: 1,
                 dataEntries: [
@@ -871,7 +810,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MOD</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Shift left, shifts bits left by specified amount
             "SHL": {
                 cells: 1,
                 dataEntries: [
@@ -901,7 +839,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SHL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Shift right, shifts bits right by specified amount
             "SHR": {
                 cells: 1,
                 dataEntries: [
@@ -931,7 +868,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SHR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Rotate left, rotates bits left by specified amount
             "ROL": {
                 cells: 1,
                 dataEntries: [
@@ -961,7 +897,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ROL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Rotate right, rotates bits right by specified amount
             "ROR": {
                 cells: 1,
                 dataEntries: [
@@ -991,7 +926,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ROR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Bitwise AND, performs logical AND on two inputs
             "AND": {
                 cells: 1,
                 dataEntries: [
@@ -1032,7 +966,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">AND</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Bitwise OR, performs logical OR on two inputs
             "OR": {
                 cells: 1,
                 dataEntries: [
@@ -1073,7 +1006,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">OR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Bitwise XOR, performs logical XOR on two inputs
             "XOR": {
                 cells: 1,
                 dataEntries: [
@@ -1114,7 +1046,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">XOR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Bitwise NOT, inverts all bits of the input
             "NOT": {
                 cells: 1,
                 dataEntries: [
@@ -1144,7 +1075,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NOT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Equal comparison, outputs true if two values are equal
             "EQ": {
                 cells: 1,
                 dataEntries: [
@@ -1174,7 +1104,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">EQ</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Greater than comparison, outputs true if first value is greater
             "GT": {
                 cells: 1,
                 dataEntries: [
@@ -1204,7 +1133,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">GT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Greater than or equal comparison, outputs true if first value is greater or equal
             "GE": {
                 cells: 1,
                 dataEntries: [
@@ -1234,7 +1162,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">GE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Less than comparison, outputs true if first value is less
             "LT": {
                 cells: 1,
                 dataEntries: [
@@ -1264,7 +1191,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">LT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Less than or equal comparison, outputs true if first value is less or equal
             "LE": {
                 cells: 1,
                 dataEntries: [
@@ -1294,7 +1220,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">LE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Not equal comparison, outputs true if two values are not equal
             "NE": {
                 cells: 1,
                 dataEntries: [
@@ -1324,7 +1249,6 @@
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            // Table move, moves a block of data from one location to another
             "TMOVE": {
                 cells: 1,
                 dataEntries: [
@@ -1367,7 +1291,6 @@
             }
         };
 
-        // Validation functions
         function isValidUInt32(str) {
             const num = parseInt(str, 10);
             return /^\d+$/.test(str) && !isNaN(num) && num >= 0 && num <= 4294967295;
@@ -1384,7 +1307,7 @@
         }
 
         function isValidCSTR(value) {
-            return true; // Allow any string
+            return true;
         }
 
         function validateValue(type, value) {
@@ -1419,31 +1342,19 @@
             }
         }
 
-        // Constants defining maximum limits for network dimensions and count
         const MAX_ROWS = 100;
         const MAX_COLS = 100;
         const MAX_NETWORKS = 10;
 
-        // Array of coil symbol names for special handling
         const coilSymbols = ["COIL", "COILL", "COILU"];
 
-        // Global variables for managing networks and history
         let networks = [];
         let networkCounter = 0;
         let history = [];
         let historyIndex = -1;
-        let currentMenu = null; // Track the currently open menu
+        let currentMenu = null;
 
-        /**
-         * Class representing a single network in the ladder logic editor.
-         */
         class Network {
-            /**
-             * Constructs a new Network instance.
-             * @param {number} rows - Number of rows in the network grid.
-             * @param {number} cols - Number of columns in the network grid.
-             * @param {number} [id=null] - Optional ID for the network; auto-increments if null.
-             */
             constructor(rows, cols, id = null) {
                 this.id = id !== null ? id : networkCounter++;
                 this.rows = rows;
@@ -1456,9 +1367,6 @@
                 this.createNetworkElement();
             }
 
-            /**
-             * Creates and appends HTML elements for the network to the DOM.
-             */
             createNetworkElement() {
                 const container = document.getElementById('networks-container');
                 const wrapper = document.createElement('div');
@@ -1513,9 +1421,6 @@
                 container.appendChild(wrapper);
             }
 
-            /**
-             * Resets all cells in the network to "NOP" with no bars or data.
-             */
             clear() {
                 this.networkData = Array(this.rows).fill().map(() => Array(this.cols).fill().map(() => ({
                     symbol: "NOP",
@@ -1526,11 +1431,6 @@
                 renderSymbolValues();
             }
 
-            /**
-             * Resizes the network grid, preserving data where possible.
-             * @param {number} newRows - New number of rows.
-             * @param {number} newCols - New number of columns.
-             */
             resize(newRows, newCols) {
                 const oldRows = this.rows;
                 const oldCols = this.cols;
@@ -1589,9 +1489,6 @@
                 renderSymbolValues();
             }
 
-            /**
-             * Renders the network grid, including symbols, labels, and vertical bars.
-             */
             renderNetwork() {
                 const network = document.getElementById(`network-${this.id}`);
                 const networkContainer = document.getElementById(`network-container-${this.id}`);
@@ -1697,9 +1594,6 @@
             }
         }
 
-        /**
-         * Updates the symbol values table with current network data.
-         */
         function renderSymbolValues() {
             const symbolValuesDiv = document.getElementById('symbolValues');
             let html = '<h3>Symbol Values</h3>';
@@ -1735,9 +1629,6 @@
             symbolValuesDiv.innerHTML = html;
         }
 
-        /**
-         * Adds a new network with default dimensions to the editor.
-         */
         function addNetwork() {
             const newNetwork = new Network(8, 8);
             networks.push(newNetwork);
@@ -1746,10 +1637,6 @@
             saveToHistory();
         }
 
-        /**
-         * Resizes a network based on user input.
-         * @param {number} id - The ID of the network to resize.
-         */
         function resizeNetwork(id) {
             const network = networks.find(n => n.id === id);
             if (!network) return;
@@ -1769,10 +1656,6 @@
             saveToHistory();
         }
 
-        /**
-         * Deletes a network or clears it if it's the only one.
-         * @param {number} id - The ID of the network to delete or clear.
-         */
         function deleteOrClearNetwork(id) {
             const network = networks.find(n => n.id === id);
             if (!network) return;
@@ -1798,19 +1681,12 @@
             }
         }
 
-        /**
-         * Hides all open popup menus and resets the currentMenu variable.
-         */
         function closeAllMenus() {
             document.getElementById('symbolMenu').style.display = 'none';
             document.getElementById('dataTypeMenu').style.display = 'none';
-            currentMenu = null; // Reset the current menu
+            currentMenu = null;
         }
 
-        /**
-         * Displays a menu for selecting symbols or actions at a cell.
-         * @param {Event} event - The click event triggering the menu.
-         */
         function showSymbolMenu(event) {
             event.preventDefault();
             event.stopPropagation();
@@ -1873,13 +1749,9 @@
             menu.style.left = `${rect.left + window.scrollX}px`;
             menu.style.top = `${rect.bottom + window.scrollY}px`;
             menu.style.display = 'block';
-            currentMenu = menu; // Set the current menu to symbol menu
+            currentMenu = menu;
         }
 
-        /**
-         * Displays a menu for configuring symbol data types and values with input validation.
-         * @param {Event} event - The contextmenu event triggering the menu.
-         */
         function showDataTypeMenu(event) {
             event.preventDefault();
             event.stopPropagation();
@@ -1942,7 +1814,6 @@
                 });
             }
 
-            // Add Confirm button
             const confirmButton = document.createElement('button');
             confirmButton.textContent = 'Confirm';
             confirmButton.onclick = () => {
@@ -1979,14 +1850,9 @@
             menu.style.left = `${rect.left + window.scrollX}px`;
             menu.style.top = `${rect.bottom + window.scrollY}px`;
             menu.style.display = 'block';
-            currentMenu = menu; // Set the current menu to data type menu
+            currentMenu = menu;
         }
 
-        /**
-         * Automatically fills a row with "CONN" symbols if it contains functional symbols.
-         * @param {Network} network - The network to modify.
-         * @param {number} row - The row index to auto-complete.
-         */
         function autoCompleteRow(network, row) {
             const hasFunctionalSymbol = network.networkData[row].some(cell => cell.symbol !== "NOP" && cell.symbol !== "CONN");
             if (hasFunctionalSymbol) {
@@ -1999,13 +1865,6 @@
             }
         }
 
-        /**
-         * Places a symbol with default data values in a cell and manages connections.
-         * @param {number} networkId - The ID of the network.
-         * @param {number} row - The row index.
-         * @param {number} col - The column index.
-         * @param {string} symbolName - The name of the symbol to place.
-         */
         function placeSymbolWithValues(networkId, row, col, symbolName) {
             const network = networks.find(n => n.id === networkId);
             const symbol = symbols[symbolName];
@@ -2080,13 +1939,6 @@
             }
         }
 
-        /**
-         * Places or deletes a symbol in a cell.
-         * @param {number} networkId - The ID of the network.
-         * @param {number} row - The row index.
-         * @param {number} col - The column index.
-         * @param {string} symbolName - The symbol name or 'delete' to remove the symbol.
-         */
         function placeSymbol(networkId, row, col, symbolName) {
             const network = networks.find(n => n.id === networkId);
             if (symbolName === 'delete') {
@@ -2104,12 +1956,6 @@
             }
         }
 
-        /**
-         * Adds a vertical bar to connect cells vertically.
-         * @param {number} networkId - The ID of the network.
-         * @param {number} row - The row index.
-         * @param {number} col - The column index.
-         */
         function addVerticalBar(networkId, row, col) {
             const network = networks.find(n => n.id === networkId);
             if (row < 1) {
@@ -2130,12 +1976,6 @@
             saveToHistory();
         }
 
-        /**
-         * Removes a vertical bar from a cell.
-         * @param {number} networkId - The ID of the network.
-         * @param {number} row - The row index.
-         * @param {number} col - The column index.
-         */
         function deleteVerticalBar(networkId, row, col) {
             const network = networks.find(n => n.id === networkId);
             network.networkData[row][col].bar = false;
@@ -2144,33 +1984,34 @@
             saveToHistory();
         }
 
-        /**
-         * Saves all networks to a JSON file for download.
-         */
         function saveNetworks() {
-            const data = networks.map(n => ({
-                id: n.id,
-                rows: n.rows,
-                cols: n.cols,
-                networkData: n.networkData
-            }));
-            const formattedData = JSON.stringify(data, null, 2);
-            const blob = new Blob([formattedData], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'ladder_networks.json';
-            a.click();
-            URL.revokeObjectURL(url);
+            if (wsStatus !== "disconnected") {
+                const data = networks.map(n => ({
+                    id: n.id,
+                    rows: n.rows,
+                    cols: n.cols,
+                    networkData: n.networkData
+                }));
+                ws.send(JSON.stringify({ action: "save", data: data }));
+                showToast("Saved to server.");
+            } else {
+                const data = networks.map(n => ({
+                    id: n.id,
+                    rows: n.rows,
+                    cols: n.cols,
+                    networkData: n.networkData
+                }));
+                const formattedData = JSON.stringify(data, null, 2);
+                const blob = new Blob([formattedData], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ladder_networks.json';
+                a.click();
+                URL.revokeObjectURL(url);
+            }
         }
 
-        /**
-         * Validates and sanitizes network data loaded from a file.
-         * @param {Array} networkData - The loaded network data array.
-         * @param {number} rows - Number of rows in the network.
-         * @param {number} cols - Number of columns in the network.
-         * @returns {Array} Sanitized network data.
-         */
         function validateNetworkData(networkData, rows, cols) {
             const validatedData = [];
             for (let i = 0; i < rows; i++) {
@@ -2210,10 +2051,6 @@
             return validatedData;
         }
 
-        /**
-         * Loads networks from a JSON file selected by the user.
-         * @param {Event} event - The file input change event.
-         */
         function loadNetworks(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -2261,10 +2098,15 @@
             reader.readAsText(file);
         }
 
-        /**
-         * Shows a temporary toast message on the screen.
-         * @param {string} message - The message to display.
-         */
+        function initiateLoad() {
+            if (wsStatus !== "disconnected") {
+                ws.send(JSON.stringify({ action: "load" }));
+                showToast("Loading from server...");
+            } else {
+                document.getElementById('loadFile').click();
+            }
+        }
+
         function showToast(message) {
             const toast = document.createElement('div');
             toast.style.position = 'fixed';
@@ -2280,9 +2122,6 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        /**
-         * Saves the current state of all networks to the history stack.
-         */
         function saveToHistory() {
             const state = JSON.stringify(networks.map(n => ({
                 id: n.id,
@@ -2297,9 +2136,6 @@
             historyIndex++;
         }
 
-        /**
-         * Reverts to the previous state in the history stack.
-         */
         function undo() {
             if (historyIndex > 0) {
                 historyIndex--;
@@ -2307,9 +2143,6 @@
             }
         }
 
-        /**
-         * Advances to the next state in the history stack.
-         */
         function redo() {
             if (historyIndex < history.length - 1) {
                 historyIndex++;
@@ -2317,9 +2150,6 @@
             }
         }
 
-        /**
-         * Restores the network state from the current history index.
-         */
         function restoreFromHistory() {
             const state = JSON.parse(history[historyIndex]);
             networks = [];
@@ -2340,7 +2170,6 @@
             renderSymbolValues();
         }
 
-        // Event listener for toggling blinking on symbol value rows and corresponding cells
         document.getElementById('symbolValues').addEventListener('click', function(event) {
             const row = event.target.closest('tr.symbol-row');
             if (row) {
@@ -2369,7 +2198,6 @@
             }
         });
 
-        // Event listener to stop blinking when clicking outside the symbol values table
         document.addEventListener('click', function(event) {
             if (!event.target.closest('#symbolValues')) {
                 const blinkingCell = document.querySelector('td.blinking');
@@ -2383,7 +2211,6 @@
             }
         });
 
-        // Global click listener to close the current menu if clicked outside
         document.addEventListener('click', function(e) {
             if (currentMenu && !currentMenu.contains(e.target)) {
                 currentMenu.style.display = 'none';
@@ -2391,12 +2218,10 @@
             }
         });
 
-        // Initialize the editor with a default network on page load
         window.onload = function() {
             addNetwork();
         };
 
-        // WebSocket functionality
         const ws = new WebSocket("ws://localhost:8080");
         let wsStatus = "disconnected";
 
@@ -2434,7 +2259,25 @@
 
         ws.onmessage = function(event) {
             const data = JSON.parse(event.data);
-            if (data.status) {
+            if (data.action === "load_response") {
+                const loadedNetworks = data.data;
+                networks = [];
+                document.getElementById('networks-container').innerHTML = '';
+                document.getElementById('symbolValues').innerHTML = '';
+                networkCounter = 0;
+                loadedNetworks.forEach(n => {
+                    const network = new Network(n.rows, n.cols, n.id);
+                    network.networkData = validateNetworkData(n.networkData, n.rows, n.cols);
+                    networks.push(network);
+                    network.renderNetwork();
+                });
+                networks.forEach((n, index) => {
+                    n.id = index;
+                });
+                renderSymbolValues();
+                saveToHistory();
+                showToast("Loaded from server.");
+            } else if (data.status) {
                 if (data.status === "running") {
                     wsStatus = "connected_running";
                     updateIndicator();
