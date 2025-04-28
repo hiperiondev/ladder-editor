@@ -1,253 +1,322 @@
 <!DOCTYPE html>
+<!--
+Author: Emiliano Augusto Gonzalez (egonzalez . hiperion @ gmail . com)
+Project URL: https://github.com/hiperiondev/ladder-editor
+-->
 <html lang="en">
 <head>
+    <!-- Sets character encoding to UTF-8 for proper text rendering -->
     <meta charset="UTF-8">
+    <!-- Ensures responsive design by setting viewport to device width -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Title of the web page displayed in the browser tab -->
     <title>Ladder PLC Editor</title>
     <style>
+        /* CSS Variables for consistent and maintainable sizing across the editor */
         :root {
-            --cell-size: 60px;
-            --label-width: 40px;
-            --controls-height: 60px;
+            --cell-size: 60px;      /* Size of each grid cell */
+            --label-width: 40px;    /* Width of row and column labels */
+            --controls-height: 60px;/* Height of the network control area */
         }
+
+        /* Media query for responsive design on small screens (max-width: 600px) */
         @media (max-width: 600px) {
             :root {
-                --cell-size: 40px;
-                --label-width: 30px;
-                --controls-height: 50px;
+                --cell-size: 40px;      /* Smaller cell size for compact screens */
+                --label-width: 30px;    /* Reduced label width */
+                --controls-height: 50px;/* Reduced controls height */
             }
+            /* Hides table headers in symbol values table for better mobile display */
             #symbolValues th {
                 display: none;
             }
         }
+
+        /* General styling for the body of the page */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 20px;
-            overflow-x: auto;
+            font-family: Arial, sans-serif; /* Sets a clean, readable font */
+            background-color: #f0f0f0;      /* Light gray background */
+            margin: 20px;                   /* Adds padding around the content */
+            overflow-x: auto;               /* Allows horizontal scrolling if needed */
         }
+
+        /* Styles the controls section containing action buttons */
         #controls {
-            margin-bottom: 20px;
+            margin-bottom: 20px; /* Space below the controls for separation */
         }
+
+        /* Container for all network diagrams, arranged vertically */
         #networks-container {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 20px; /* Space between individual networks */
         }
+
+        /* Wrapper for each network, including its controls and table */
         .network-wrapper {
-            position: relative;
+            position: relative; /* Allows absolute positioning of child elements */
             display: block;
-            margin-bottom: 20px;
+            margin-bottom: 20px; /* Space below each network */
         }
+
+        /* Styles the grid table representing a ladder logic network */
         .network-table {
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin-left: var(--label-width);
-            margin-top: calc(var(--controls-height) + 20px);
-            margin-bottom: 40px;
-            border: 1px solid #ddd;
+            border-collapse: collapse;      /* Removes gaps between cells */
+            background-color: #fff;         /* White background for the grid */
+            box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+            margin-left: var(--label-width);/* Offset for row labels */
+            margin-top: calc(var(--controls-height) + 20px); /* Space for controls */
+            margin-bottom: 40px;            /* Extra space below the table */
+            border: 1px solid #ddd;         /* Light border around the table */
         }
+
+        /* Styles individual cells in the network table */
         .network-table td {
-            width: var(--cell-size);
-            height: var(--cell-size);
-            border: 1px solid #ddd;
-            padding: 0;
-            text-align: center;
-            vertical-align: middle;
-            cursor: pointer;
-            position: relative;
-            overflow: visible;
-            box-sizing: border-box;
-            background-color: #fff;
+            width: var(--cell-size);  /* Fixed width from CSS variable */
+            height: var(--cell-size); /* Fixed height from CSS variable */
+            border: 1px solid #ddd;   /* Light border for cell outlines */
+            padding: 0;               /* Removes default padding */
+            text-align: center;       /* Centers content horizontally */
+            vertical-align: middle;   /* Centers content vertically */
+            cursor: pointer;          /* Indicates cells are clickable */
+            position: relative;       /* For positioning SVGs or bars */
+            overflow: visible;        /* Allows SVGs to extend beyond cell */
+            box-sizing: border-box;   /* Includes border in size calculations */
+            background-color: #fff;   /* White background for cells */
         }
+
+        /* Hover effect for cells to indicate interactivity */
         .network-table td:hover {
-            background-color: #f5f5f5;
+            background-color: #f5f5f5; /* Light gray on hover */
         }
+
+        /* Ensures SVGs within cells fit properly */
         .network-table td svg {
-            width: 100%;
-            height: 100%;
+            width: 100%;              /* Fills the cell width */
+            height: 100%;             /* Fills the cell height */
             display: block;
-            margin: 0 auto;
-            object-fit: contain;
-            preserveAspectRatio: meet;
+            margin: 0 auto;           /* Centers the SVG */
+            object-fit: contain;      /* Maintains SVG aspect ratio */
+            preserveAspectRatio: meet;/* Preserves SVG proportions */
         }
+
+        /* Styles for SVGs spanning multiple cells (e.g., timers) */
         .multi-cell-svg {
-            position: absolute;
+            position: absolute; /* Positions SVG over multiple rows */
             top: 0;
             left: 0;
-            width: var(--cell-size);
+            width: var(--cell-size); /* Matches cell width */
         }
+
+        /* Common styles for row and column labels */
         .row-label, .col-label {
-            font-size: 14px;
-            font-weight: bold;
-            color: #333;
-            position: absolute;
-            pointer-events: none;
+            font-size: 14px;        /* Readable font size */
+            font-weight: bold;      /* Bold for emphasis */
+            color: #333;            /* Dark gray color */
+            position: absolute;     /* Absolute positioning relative to wrapper */
+            pointer-events: none;   /* Prevents interference with clicks */
         }
+
+        /* Specific styles for row labels (left of the grid) */
         .row-label {
-            width: var(--label-width);
-            text-align: right;
+            width: var(--label-width); /* Fixed width from CSS variable */
+            text-align: right;         /* Right-aligned text */
             left: 0;
-            padding-right: 6px;
-            top: calc(var(--controls-height) + 20px + var(--row-index) * var(--cell-size) + (var(--cell-size) / 2));
-            transform: translateY(-50%);
+            padding-right: 6px;        /* Space between label and grid */
+            top: calc(var(--controls-height) + 20px + var(--row-index) * var(--cell-size) + (var(--cell-size) / 2)); /* Positions based on row index */
+            transform: translateY(-50%); /* Vertically centers the label */
         }
+
+        /* Specific styles for column labels (above the grid) */
         .col-label {
-            width: var(--cell-size);
-            text-align: center;
-            top: calc(var(--controls-height) + 20px - 3px - 14px);
-            left: calc(var(--label-width) + var(--col-index) * var(--cell-size));
+            width: var(--cell-size); /* Matches cell width */
+            text-align: center;      /* Centers the label text */
+            top: calc(var(--controls-height) + 20px - 3px - 14px); /* Positions above grid */
+            left: calc(var(--label-width) + var(--col-index) * var(--cell-size)); /* Positions based on column index */
         }
+
+        /* Styles the symbol values table container */
         #symbolValues {
-            margin-top: 20px;
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            margin-top: 20px;           /* Space above the table */
+            background-color: #fff;     /* White background */
+            padding: 15px;              /* Internal padding */
+            border-radius: 8px;         /* Rounded corners */
+            box-shadow: 0 0 5px rgba(0,0,0,0.1); /* Subtle shadow */
         }
+
+        /* Styles the table inside the symbol values container */
         #symbolValues table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+            width: 100%;          /* Full width of the container */
+            border-collapse: collapse; /* Removes gaps between cells */
+            margin-top: 10px;     /* Space above the table */
         }
+
+        /* Styles table headers and cells in symbol values table */
         #symbolValues th, #symbolValues td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
+            border: 1px solid #ddd; /* Light border for cells */
+            padding: 8px;           /* Internal padding */
+            text-align: left;       /* Left-aligned text */
         }
+
+        /* Styles table headers specifically */
         #symbolValues th {
-            background-color: #0288d1;
-            color: white;
+            background-color: #0288d1; /* Blue background */
+            color: white;              /* White text */
         }
+
+        /* Alternating row colors for readability */
         #symbolValues tr:nth-child(even) td.data {
-            background-color: #fffde7;
+            background-color: #fffde7; /* Light yellow for even rows */
         }
         #symbolValues tr:nth-child(odd) td.data {
-            background-color: #f5f5f5;
+            background-color: #f5f5f5; /* Light gray for odd rows */
         }
+
+        /* Specific column styling in symbol values table */
         #symbolValues td.network-id {
-            background-color: #e0f7fa;
+            background-color: #e0f7fa; /* Light cyan for network ID */
         }
         #symbolValues td.symbol {
-            background-color: #e6ffe6;
+            background-color: #e6ffe6; /* Light green for symbol names */
         }
+
+        /* Styles for the symbol and data type context menus */
         #symbolMenu, #dataTypeMenu {
-            position: absolute;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 1000;
-            padding: 5px;
-            display: none;
-            min-width: 150px;
+            position: absolute;       /* Positions at click location */
+            background-color: #fff;   /* White background */
+            border: 1px solid #ccc;   /* Light border */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Shadow for depth */
+            z-index: 1000;            /* Ensures menu appears above other elements */
+            padding: 5px;             /* Internal padding */
+            display: none;            /* Hidden by default */
+            min-width: 150px;         /* Minimum width for readability */
         }
+
+        /* Styles for items within the menus */
         .menu-item {
-            padding: 5px 10px;
-            cursor: pointer;
+            padding: 5px 10px; /* Padding for clickable area */
+            cursor: pointer;   /* Indicates interactivity */
         }
         .menu-item:hover {
-            background-color: #e0e0e0;
+            background-color: #e0e0e0; /* Gray hover effect */
         }
+
+        /* Styles for data entry sections in the data type menu */
         .value-entry {
-            margin-bottom: 10px;
+            margin-bottom: 10px; /* Space between entries */
         }
         .value-label {
-            font-weight: bold;
-            margin-right: 5px;
+            font-weight: bold; /* Bold labels */
+            margin-right: 5px; /* Space before input */
         }
         .value-pair {
-            display: flex;
-            align-items: center;
-            margin: 5px 0;
+            display: flex;      /* Flexbox for alignment */
+            align-items: center;/* Vertically centers items */
+            margin: 5px 0;      /* Vertical spacing */
         }
         .value-pair select, .value-pair input, .value-pair span {
-            margin-right: 5px;
-            font-size: 12px;
+            margin-right: 5px; /* Space between elements */
+            font-size: 12px;   /* Smaller font for compactness */
         }
+
+        /* General button styling */
         button {
-            padding: 5px 10px;
-            margin-right: 5px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
+            padding: 5px 10px;    /* Padding for size */
+            margin-right: 5px;    /* Space between buttons */
+            background-color: #4CAF50; /* Green background */
+            color: white;         /* White text */
+            border: none;         /* No border */
+            cursor: pointer;      /* Indicates clickability */
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #45a049; /* Darker green on hover */
         }
+
+        /* Specific styling for delete buttons */
         .delete-button {
-            background-color: #ff0000;
+            background-color: #ff0000; /* Red background */
         }
         .delete-button:hover {
-            background-color: #cc0000;
+            background-color: #cc0000; /* Darker red on hover */
         }
+
+        /* Styling for input fields (e.g., resize inputs) */
         input {
-            padding: 5px;
-            margin-right: 10px;
-            width: 60px;
+            padding: 5px;      /* Internal padding */
+            margin-right: 10px;/* Space after input */
+            width: 60px;       /* Fixed width */
         }
+
+        /* Controls section for each network (resize, delete) */
         .network-controls {
-            position: absolute;
+            position: absolute; /* Positions above the table */
             top: 0;
             left: 0;
-            display: flex;
-            align-items: center;
-            padding: 5px 0;
-            z-index: 10;
+            display: flex;      /* Flexbox for horizontal layout */
+            align-items: center;/* Vertically centers items */
+            padding: 5px 0;     /* Vertical padding */
+            z-index: 10;        /* Ensures visibility over table */
         }
+
+        /* Label displaying the network number */
         .network-label {
-            position: absolute;
-            top: -20px;
+            position: absolute; /* Positioned above controls */
+            top: -20px;         /* Offset above the wrapper */
             left: 0;
-            font-weight: bold;
-            width: 150px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-weight: bold;  /* Bold text */
+            width: 150px;       /* Fixed width */
+            white-space: nowrap;/* Prevents wrapping */
+            overflow: hidden;   /* Hides overflow */
+            text-overflow: ellipsis; /* Adds ellipsis for long text */
         }
+
+        /* Styles for vertical bars connecting ladder rungs */
         .vertical-bar {
-            position: absolute;
-            z-index: 100;
+            position: absolute; /* Positioned over the grid */
+            z-index: 100;       /* Ensures visibility */
         }
+
+        /* Responsive adjustments for small screens */
         @media (max-width: 600px) {
             .row-label, .col-label {
-                font-size: 12px;
+                font-size: 12px; /* Smaller font size */
             }
             .row-label {
                 left: 0;
-                padding-right: 6px;
+                padding-right: 6px; /* Adjusted padding */
             }
             .col-label {
-                top: calc(var(--controls-height) + 20px - 3px - 12px);
+                top: calc(var(--controls-height) + 20px - 3px - 12px); /* Adjusted position */
             }
             input {
-                width: 50px;
+                width: 50px; /* Smaller input width */
             }
             .network-label {
-                width: 120px;
+                width: 120px; /* Reduced width */
             }
             #symbolValues table {
-                font-size: 12px;
+                font-size: 12px; /* Smaller font */
             }
             #symbolValues th, #symbolValues td {
-                padding: 5px;
+                padding: 5px; /* Reduced padding */
             }
+            /* Converts table to block layout for mobile */
             #symbolValues table, #symbolValues thead, #symbolValues tbody, #symbolValues th, #symbolValues td, #symbolValues tr {
                 display: block;
             }
             #symbolValues thead {
-                display: none;
+                display: none; /* Hides headers */
             }
             #symbolValues tr {
-                margin-bottom: 15px;
+                margin-bottom: 15px; /* Space between rows */
             }
             #symbolValues td {
-                border: none;
-                position: relative;
-                padding-left: 50%;
-                text-align: left;
+                border: none;       /* Removes borders */
+                position: relative; /* For pseudo-element positioning */
+                padding-left: 50%;  /* Space for labels */
+                text-align: left;   /* Left-aligned text */
             }
+            /* Adds labels before each cell using data-label attribute */
             #symbolValues td::before {
                 content: attr(data-label);
                 position: absolute;
@@ -258,21 +327,23 @@
                 font-weight: bold;
             }
             #symbolValues td.data {
-                word-wrap: break-word;
+                word-wrap: break-word; /* Allows text wrapping */
             }
         }
+
+        /* Animation for blinking effect to highlight elements */
         .blinking {
-            animation: backgroundBlink 1s infinite;
+            animation: backgroundBlink 1s infinite; /* Blinks background */
         }
         .blinking svg [stroke] {
-            animation: strokeBlink 1s infinite;
+            animation: strokeBlink 1s infinite; /* Blinks SVG stroke */
         }
         .blinking svg text {
-            animation: fillBlink 1s infinite;
+            animation: fillBlink 1s infinite; /* Blinks SVG text */
         }
         @keyframes backgroundBlink {
             0% { background-color: #fff; }
-            50% { background-color: #ffcccc; }
+            50% { background-color: #ffcccc; } /* Light red at peak */
             100% { background-color: #fff; }
         }
         @keyframes strokeBlink {
@@ -286,203 +357,126 @@
             100% { fill: green; }
         }
         tr.blinking td {
-            animation: rowBlink 1s infinite;
+            animation: rowBlink 1s infinite; /* Blinks entire row */
         }
         @keyframes rowBlink {
             0% { background-color: #fff; }
             50% { background-color: #ffcccc; }
             100% { background-color: #fff; }
         }
+
+        /* Highlights active cells (e.g., during WebSocket updates) */
         td.active {
-            background-color: yellow;
+            background-color: yellow; /* Yellow background */
         }
     </style>
 </head>
 <body>
+    <!-- Controls for managing networks and actions -->
     <div id="controls">
+        <!-- Button to add a new network -->
         <button onclick="addNetwork()">Add Network</button>
+        <!-- Button to save networks (via WebSocket or file) -->
         <button onclick="saveNetworks()">Save</button>
+        <!-- Hidden file input for loading networks from JSON -->
         <input type="file" id="loadFile" accept=".json" style="display: none;" onchange="loadNetworks(event)">
+        <!-- Button to trigger loading (file or server) -->
         <button onclick="initiateLoad()">Load</button>
+        <!-- Button to undo the last action -->
         <button onclick="undo()">Undo</button>
+        <!-- Button to redo an undone action -->
         <button onclick="redo()">Redo</button>
+        <!-- WebSocket connection status indicator -->
         <div id="ws-indicator" style="display: inline-block; width: 20px; height: 20px; border-radius: 50%; background-color: red; margin-left: 10px;"></div>
     </div>
+
+    <!-- Container where all network diagrams are dynamically added -->
     <div id="networks-container"></div>
+
+    <!-- Context menu for selecting ladder logic symbols -->
     <div id="symbolMenu"></div>
+
+    <!-- Context menu for setting data types and values -->
     <div id="dataTypeMenu"></div>
+
+    <!-- Table displaying all symbols and their associated data -->
     <div id="symbolValues"></div>
 
     <script>
+        // List of supported data types for symbol data entries
         const dataTypes = [
             "NONE", "M", "Q", "I", "Cd", "Cr", "Td", "Tr", "IW", "QW", "C", "T",
             "D", "CSTR", "REAL", "MS", "10MS", "100MS",
             "SEC", "MIN", "K"
         ];
 
+        // Definitions of ladder logic symbols with their properties
         const symbols = {
-            "NOP": {
-                cells: 1,
-                dataEntries: [],
+            "NOP": { // No Operation symbol
+                cells: 1,              // Occupies 1 cell
+                dataEntries: [],       // No data required
                 svg: `<svg viewBox="0 0 60 60"><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NOP</text></svg>`,
-                pins: [{ left: false, right: false }]
+                pins: [{ left: false, right: false }] // No connections
             },
-            "CONN": {
+            "CONN": { // Connection line symbol
                 cells: 1,
                 dataEntries: [],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
-                pins: [{ left: true, right: true }]
+                pins: [{ left: true, right: true }] // Connects left and right
             },
-            "NEG": {
+            "NEG": { // Negation symbol
                 cells: 1,
-                dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: ["NONE"]
-                    }
-                ],
+                dataEntries: [{ name: "value1", allowedTypes: ["NONE"] }],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NEG</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "NO": {
+            "NO": { // Normally Open contact
                 cells: 1,
-                dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "I",
-                            "Q",
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
-                ],
+                dataEntries: [{ name: "value1", allowedTypes: ["I", "Q", "D", "T", "C", "IW", "K", "QW"] }],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "NC": {
+            "NC": { // Normally Closed contact
                 cells: 1,
-                dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "I",
-                            "Q",
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
-                ],
+                dataEntries: [{ name: "value1", allowedTypes: ["I", "Q", "D", "T", "C", "IW", "K", "QW"] }],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="40" x2="40" y2="20" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "RE": {
+            "RE": { // Rising Edge contact
                 cells: 1,
-                dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "I",
-                            "Q",
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
-                ],
+                dataEntries: [{ name: "value1", allowedTypes: ["I", "Q", "D", "T", "C", "IW", "K", "QW"] }],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="30" y="35" font-size="12" text-anchor="middle" fill="green">P</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "FE": {
+            "FE": { // Falling Edge contact
                 cells: 1,
-                dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "I",
-                            "Q",
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
-                ],
+                dataEntries: [{ name: "value1", allowedTypes: ["I", "Q", "D", "T", "C", "IW", "K", "QW"] }],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="30" y="35" font-size="12" text-anchor="middle" fill="green">N</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "COIL": {
+            "COIL": { // Standard coil
                 cells: 1,
-                dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "M",
-                            "Q"
-                        ]
-                    }
-                ],
+                dataEntries: [{ name: "value1", allowedTypes: ["M", "Q"] }],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "COILL": {
+            "COILL": { // Latch (Set) coil
                 cells: 1,
-                dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "M",
-                            "Q"
-                        ]
-                    }
-                ],
+                dataEntries: [{ name: "value1", allowedTypes: ["M", "Q"] }],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="27" y="35" font-size="12" text-anchor="middle" fill="green">S</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "COILU": {
+            "COILU": { // Unlatch (Reset) coil
                 cells: 1,
-                dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "M",
-                            "Q"
-                        ]
-                    }
-                ],
+                dataEntries: [{ name: "value1", allowedTypes: ["M", "Q"] }],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="27" y="35" font-size="12" text-anchor="middle" fill="green">R</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "TON": {
+            "TON": { // On-Delay Timer
                 cells: 2,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: ["T"]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "MS",
-                            "10MS",
-                            "100MS",
-                            "SEC",
-                            "MIN"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["T"] },
+                    { name: "value2", allowedTypes: ["MS", "10MS", "100MS", "SEC", "MIN"] }
                 ],
                 svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TON</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/>< text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
                 pins: [
@@ -490,23 +484,11 @@
                     { left: false, right: true }
                 ]
             },
-            "TOF": {
+            "TOF": { // Off-Delay Timer
                 cells: 2,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: ["T"]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "MS",
-                            "10MS",
-                            "100MS",
-                            "SEC",
-                            "MIN"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["T"] },
+                    { name: "value2", allowedTypes: ["MS", "10MS", "100MS", "SEC", "MIN"] }
                 ],
                 svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TOF</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
                 pins: [
@@ -514,23 +496,11 @@
                     { left: false, right: true }
                 ]
             },
-            "TP": {
+            "TP": { // Pulse Timer
                 cells: 2,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: ["T"]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "MS",
-                            "10MS",
-                            "100MS",
-                            "SEC",
-                            "MIN"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["T"] },
+                    { name: "value2", allowedTypes: ["MS", "10MS", "100MS", "SEC", "MIN"] }
                 ],
                 svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TP</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
                 pins: [
@@ -538,17 +508,11 @@
                     { left: false, right: true }
                 ]
             },
-            "CTU": {
+            "CTU": { // Up Counter
                 cells: 2,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: ["C"]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: ["NONE"]
-                    }
+                    { name: "value1", allowedTypes: ["C"] },
+                    { name: "value2", allowedTypes: ["NONE"] }
                 ],
                 svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">CTU</text><text x="15" y="40" font-size="10" fill="green">CU</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="15" y="100" font-size="10" fill="green">R</text><line x1="0" y1="90" x2="10" y2="90" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
                 pins: [
@@ -556,17 +520,11 @@
                     { left: true, right: true }
                 ]
             },
-            "CTD": {
+            "CTD": { // Down Counter
                 cells: 2,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: ["C"]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: ["NONE"]
-                    }
+                    { name: "value1", allowedTypes: ["C"] },
+                    { name: "value2", allowedTypes: ["NONE"] }
                 ],
                 svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">CTD</text><text x="15" y="40" font-size="10" fill="green">CD</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="15" y="100" font-size="10" fill="green">R</text><line x1="0" y1="90" x2="10" y2="90" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
                 pins: [
@@ -574,71 +532,21 @@
                     { left: true, right: true }
                 ]
             },
-            "MOVE": {
+            "MOVE": { // Move operation
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MOVE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "SUB": {
+            "SUB": { // Subtraction operation
                 cells: 3,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value3",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 180"><rect x="10" y="10" width="40" height="160" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SUB</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/><text x="35" y="160" font-size="10" fill="green">Q2</text><line x1="50" y1="150" x2="60" y2="150" stroke="green" stroke-width="2"/></svg>`,
                 pins: [
@@ -647,122 +555,32 @@
                     { left: false, right: true }
                 ]
             },
-            "ADD": {
+            "ADD": { // Addition operation
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value3",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ADD</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "MUL": {
+            "MUL": { // Multiplication operation
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value3",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MUL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "DIV": {
+            "DIV": { // Division operation
                 cells: 2,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value3",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">DIV</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
                 pins: [
@@ -770,546 +588,181 @@
                     { left: false, right: true }
                 ]
             },
-            "MOD": {
+            "MOD": { // Modulus operation
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value3",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MOD</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "SHL": {
+            "SHL": { // Shift Left operation
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SHL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "SHR": {
+            "SHR": { // Shift Right operation
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SHR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "ROL": {
+            "ROL": { // Rotate Left operation
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ROL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "ROR": {
+            "ROR": { // Rotate Right operation
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ROR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "AND": {
+            "AND": { // Logical AND operation
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value3",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">AND</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "OR": {
+            "OR": { // Logical OR operation
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value3",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">OR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "XOR": {
+            "XOR": { // Logical XOR operation
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value3",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">XOR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "NOT": {
+            "NOT": { // Logical NOT operation
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NOT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "EQ": {
+            "EQ": { // Equal comparison
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">EQ</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "GT": {
+            "GT": { // Greater Than comparison
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">GT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "GE": {
+            "GE": { // Greater or Equal comparison
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">GE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "LT": {
+            "LT": { // Less Than comparison
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">LT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "LE": {
+            "LE": { // Less or Equal comparison
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">LE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "NE": {
+            "NE": { // Not Equal comparison
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "TMOVE": {
+            "TMOVE": { // Table Move operation
                 cells: 1,
                 dataEntries: [
-                    {
-                        name: "value1",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value2",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    },
-                    {
-                        name: "value3",
-                        allowedTypes: [
-                            "D",
-                            "T",
-                            "C",
-                            "IW",
-                            "K",
-                            "QW"
-                        ]
-                    }
+                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TMOVE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             }
         };
 
+        // Validates if a string is a valid unsigned 32-bit integer
         function isValidUInt32(str) {
             const num = parseInt(str, 10);
             return /^\d+$/.test(str) && !isNaN(num) && num >= 0 && num <= 4294967295;
         }
 
+        // Validates Q or I type values (e.g., "1.2.3" format)
         function isValidQorI(value) {
             const parts = value.split('.');
             if (parts.length < 1 || parts.length > 3) return false;
             return parts.every(part => isValidUInt32(part));
         }
 
+        // Validates real number format (e.g., "1.23", "-4.5e2")
         function isValidReal(value) {
             return /^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/.test(value);
         }
 
+        // Validates string values (accepts any string for CSTR)
         function isValidCSTR(value) {
             return true;
         }
 
+        // Validates input value based on its data type
         function validateValue(type, value) {
             switch (type) {
                 case "NONE":
@@ -1342,32 +795,38 @@
             }
         }
 
-        const MAX_ROWS = 100;
-        const MAX_COLS = 100;
-        const MAX_NETWORKS = 10;
+        // Constants defining maximum limits for the editor
+        const MAX_ROWS = 100;      // Maximum rows per network
+        const MAX_COLS = 100;      // Maximum columns per network
+        const MAX_NETWORKS = 10;   // Maximum number of networks
 
+        // List of coil-type symbols
         const coilSymbols = ["COIL", "COILL", "COILU"];
 
-        let networks = [];
-        let networkCounter = 0;
-        let history = [];
-        let historyIndex = -1;
-        let currentMenu = null;
-        let sameDimensionsFlag = false;
+        // Global variables for editor state
+        let networks = [];         // Array of all networks
+        let networkCounter = 0;    // Counter for assigning network IDs
+        let history = [];          // History stack for undo/redo
+        let historyIndex = -1;     // Current position in history
+        let currentMenu = null;    // Tracks the currently open menu
+        let sameDimensionsFlag = false; // Flag to enforce same dimensions across networks
 
+        // Class representing a single ladder logic network
         class Network {
             constructor(rows, cols, id = null) {
-                this.id = id !== null ? id : networkCounter++;
-                this.rows = rows;
-                this.cols = cols;
+                this.id = id !== null ? id : networkCounter++; // Assigns unique ID
+                this.rows = rows;    // Number of rows in the grid
+                this.cols = cols;    // Number of columns in the grid
+                // Initializes grid with NOP symbols
                 this.networkData = Array(rows).fill().map(() => Array(cols).fill().map(() => ({
                     symbol: "NOP",
-                    bar: false,
-                    data: []
+                    bar: false,      // Indicates vertical bar presence
+                    data: []         // Data entries for the symbol
                 })));
-                this.createNetworkElement();
+                this.createNetworkElement(); // Creates HTML elements for the network
             }
 
+            // Creates the DOM elements for the network
             createNetworkElement() {
                 const container = document.getElementById('networks-container');
                 const wrapper = document.createElement('div');
@@ -1422,6 +881,7 @@
                 container.appendChild(wrapper);
             }
 
+            // Clears the network by resetting all cells to NOP
             clear() {
                 this.networkData = Array(this.rows).fill().map(() => Array(this.cols).fill().map(() => ({
                     symbol: "NOP",
@@ -1432,6 +892,7 @@
                 renderSymbolValues();
             }
 
+            // Resizes the network grid, preserving data where possible
             resize(newRows, newCols) {
                 const oldRows = this.rows;
                 const oldCols = this.cols;
@@ -1490,6 +951,7 @@
                 renderSymbolValues();
             }
 
+            // Renders the network grid in the DOM
             renderNetwork() {
                 const network = document.getElementById(`network-${this.id}`);
                 const networkContainer = document.getElementById(`network-container-${this.id}`);
@@ -1499,12 +961,15 @@
                 }
                 network.innerHTML = '';
 
+                // Remove existing labels and bars
                 document.querySelectorAll(`#network-container-${this.id} .row-label, #network-container-${this.id} .col-label, #network-container-${this.id} .vertical-bar`).forEach(el => el.remove());
 
+                // Get CSS variable values for positioning
                 const cellSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell-size')) || 60;
                 const labelWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--label-width')) || 40;
                 const controlsHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--controls-height')) || 60;
 
+                // Add column labels
                 for (let j = 0; j < this.cols; j++) {
                     const colLabel = document.createElement('div');
                     colLabel.className = 'col-label';
@@ -1513,6 +978,7 @@
                     networkContainer.appendChild(colLabel);
                 }
 
+                // Render the grid
                 for (let i = 0; i < this.rows; i++) {
                     const tr = document.createElement('tr');
                     const rowLabel = document.createElement('div');
@@ -1564,6 +1030,7 @@
                     network.appendChild(tr);
                 }
 
+                // Add vertical bars
                 for (let i = 1; i < this.rows; i++) {
                     for (let j = 0; j < this.cols - 1; j++) {
                         if (this.networkData[i][j].bar && this.networkData[i][j].symbol !== 'occupied') {
@@ -1595,6 +1062,7 @@
             }
         }
 
+        // Updates the symbol values table with current data
         function renderSymbolValues() {
             const symbolValuesDiv = document.getElementById('symbolValues');
             let html = '<h3>Symbol Values</h3>';
@@ -1630,11 +1098,12 @@
             symbolValuesDiv.innerHTML = html;
         }
 
+        // Adds a new network to the editor
         function addNetwork() {
-            let rows = 8;
+            let rows = 8; // Default size
             let cols = 8;
             if (sameDimensionsFlag && networks.length > 0) {
-                rows = networks[0].rows;
+                rows = networks[0].rows; // Enforces same dimensions if flag is set
                 cols = networks[0].cols;
             }
             const newNetwork = new Network(rows, cols);
@@ -1644,6 +1113,7 @@
             saveToHistory();
         }
 
+        // Resizes a network based on user input
         function resizeNetwork(id) {
             const rowsInput = document.getElementById(`rows-${id}`);
             const colsInput = document.getElementById(`cols-${id}`);
@@ -1659,7 +1129,7 @@
             }
             if (sameDimensionsFlag) {
                 networks.forEach(network => {
-                    network.resize(newRows, newCols);
+                    network.resize(newRows, newCols); // Resizes all networks if flag is set
                 });
             } else {
                 const network = networks.find(n => n.id === id);
@@ -1670,12 +1140,13 @@
             saveToHistory();
         }
 
+        // Deletes a network or clears it if it's the last one
         function deleteOrClearNetwork(id) {
             const network = networks.find(n => n.id === id);
             if (!network) return;
 
             if (networks.length === 1) {
-                network.clear();
+                network.clear(); // Clears the network if only one remains
                 showToast("Network cleared. At least one network must remain.");
                 saveToHistory();
             } else {
@@ -1685,7 +1156,7 @@
                 networks.splice(indexToDelete, 1);
                 document.getElementById('networks-container').innerHTML = '';
                 networks.forEach((network, newIndex) => {
-                    network.id = newIndex;
+                    network.id = newIndex; // Reassigns IDs
                     network.createNetworkElement();
                     network.renderNetwork();
                 });
@@ -1695,12 +1166,14 @@
             }
         }
 
+        // Closes all open context menus
         function closeAllMenus() {
             document.getElementById('symbolMenu').style.display = 'none';
             document.getElementById('dataTypeMenu').style.display = 'none';
             currentMenu = null;
         }
 
+        // Shows the symbol selection menu on left-click
         function showSymbolMenu(event) {
             event.preventDefault();
             event.stopPropagation();
@@ -1713,6 +1186,7 @@
             const menu = document.getElementById('symbolMenu');
             menu.innerHTML = '';
 
+            // Option to add a vertical bar
             if (row > 0 && col < network.cols - 1 && network.networkData[row][col].symbol !== 'occupied' && !network.networkData[row][col].bar) {
                 const addBarItem = document.createElement('div');
                 addBarItem.className = 'menu-item';
@@ -1724,6 +1198,7 @@
                 menu.appendChild(addBarItem);
             }
 
+            // Option to delete a vertical bar
             if (network.networkData[row][col].bar) {
                 const deleteBarItem = document.createElement('div');
                 deleteBarItem.className = 'menu-item';
@@ -1735,6 +1210,7 @@
                 menu.appendChild(deleteBarItem);
             }
 
+            // Option to delete an existing symbol
             if (network.networkData[row][col].symbol !== "NOP" && network.networkData[row][col].symbol !== 'occupied') {
                 const deleteItem = document.createElement('div');
                 deleteItem.className = 'menu-item';
@@ -1746,6 +1222,7 @@
                 menu.appendChild(deleteItem);
             }
 
+            // Options to place new symbols
             if (network.networkData[row][col].symbol === "NOP" || network.networkData[row][col].symbol === "CONN") {
                 Object.keys(symbols).filter(name => name !== "NOP").forEach(name => {
                     const item = document.createElement('div');
@@ -1766,6 +1243,7 @@
             currentMenu = menu;
         }
 
+        // Shows the data type menu on right-click
         function showDataTypeMenu(event) {
             event.preventDefault();
             event.stopPropagation();
@@ -1867,6 +1345,7 @@
             currentMenu = menu;
         }
 
+        // Automatically fills a row with CONN symbols if a functional symbol is present
         function autoCompleteRow(network, row) {
             const hasFunctionalSymbol = network.networkData[row].some(cell => cell.symbol !== "NOP" && cell.symbol !== "CONN");
             if (hasFunctionalSymbol) {
@@ -1879,6 +1358,7 @@
             }
         }
 
+        // Places a symbol and handles its data entries and connections
         function placeSymbolWithValues(networkId, row, col, symbolName) {
             const network = networks.find(n => n.id === networkId);
             const symbol = symbols[symbolName];
@@ -1953,6 +1433,7 @@
             }
         }
 
+        // Places or deletes a symbol at a specific position
         function placeSymbol(networkId, row, col, symbolName) {
             const network = networks.find(n => n.id === networkId);
             if (symbolName === 'delete') {
@@ -1970,6 +1451,7 @@
             }
         }
 
+        // Adds a vertical bar to connect ladder rungs
         function addVerticalBar(networkId, row, col) {
             const network = networks.find(n => n.id === networkId);
             if (row < 1) {
@@ -1990,6 +1472,7 @@
             saveToHistory();
         }
 
+        // Deletes a vertical bar
         function deleteVerticalBar(networkId, row, col) {
             const network = networks.find(n => n.id === networkId);
             network.networkData[row][col].bar = false;
@@ -1998,6 +1481,7 @@
             saveToHistory();
         }
 
+        // Saves networks to server via WebSocket or downloads as JSON file
         function saveNetworks() {
             if (wsStatus !== "disconnected") {
                 const data = networks.map(n => ({
@@ -2026,6 +1510,7 @@
             }
         }
 
+        // Validates network data when loading from external source
         function validateNetworkData(networkData, rows, cols) {
             const validatedData = [];
             for (let i = 0; i < rows; i++) {
@@ -2065,6 +1550,7 @@
             return validatedData;
         }
 
+        // Loads networks from a JSON file
         function loadNetworks(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -2112,6 +1598,7 @@
             reader.readAsText(file);
         }
 
+        // Initiates loading from server or file input
         function initiateLoad() {
             if (wsStatus !== "disconnected") {
                 ws.send(JSON.stringify({ action: "load" }));
@@ -2121,6 +1608,7 @@
             }
         }
 
+        // Displays a temporary notification message
         function showToast(message) {
             const toast = document.createElement('div');
             toast.style.position = 'fixed';
@@ -2136,6 +1624,7 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
+        // Saves the current state to history for undo/redo
         function saveToHistory() {
             const state = JSON.stringify(networks.map(n => ({
                 id: n.id,
@@ -2144,12 +1633,13 @@
                 networkData: n.networkData.map(row => row.map(cell => ({ ...cell })))
             })));
             if (historyIndex < history.length - 1) {
-                history = history.slice(0, historyIndex + 1);
+                history = history.slice(0, historyIndex + 1); // Truncates redo stack
             }
             history.push(state);
             historyIndex++;
         }
 
+        // Reverts to the previous state in history
         function undo() {
             if (historyIndex > 0) {
                 historyIndex--;
@@ -2157,6 +1647,7 @@
             }
         }
 
+        // Advances to the next state in history
         function redo() {
             if (historyIndex < history.length - 1) {
                 historyIndex++;
@@ -2164,6 +1655,7 @@
             }
         }
 
+        // Restores the editor state from history
         function restoreFromHistory() {
             const state = JSON.parse(history[historyIndex]);
             networks = [];
@@ -2184,6 +1676,7 @@
             renderSymbolValues();
         }
 
+        // Event listener for clicking symbol values table rows to highlight cells
         document.getElementById('symbolValues').addEventListener('click', function(event) {
             const row = event.target.closest('tr.symbol-row');
             if (row) {
@@ -2212,6 +1705,7 @@
             }
         });
 
+        // Clears blinking when clicking outside symbol values table
         document.addEventListener('click', function(event) {
             if (!event.target.closest('#symbolValues')) {
                 const blinkingCell = document.querySelector('td.blinking');
@@ -2225,6 +1719,7 @@
             }
         });
 
+        // Closes context menus when clicking outside
         document.addEventListener('click', function(e) {
             if (currentMenu && !currentMenu.contains(e.target)) {
                 currentMenu.style.display = 'none';
@@ -2232,13 +1727,16 @@
             }
         });
 
+        // Initializes the editor with one network on page load
         window.onload = function() {
             addNetwork();
         };
 
+        // WebSocket setup for real-time communication with server
         const ws = new WebSocket("ws://localhost:8080");
-        let wsStatus = "disconnected";
+        let wsStatus = "disconnected"; // Tracks WebSocket connection state
 
+        // Updates the WebSocket status indicator color
         function updateIndicator() {
             const indicator = document.getElementById('ws-indicator');
             if (wsStatus === "disconnected") {
@@ -2250,10 +1748,12 @@
             }
         }
 
+        // Resets all cells to default state (removes active class)
         function setAllCellsDefault() {
             document.querySelectorAll('td.active').forEach(cell => cell.classList.remove('active'));
         }
 
+        // Applies active states to cells based on WebSocket data
         function applyCellStates(cellStates) {
             setAllCellsDefault();
             cellStates.forEach(cs => {
@@ -2266,16 +1766,18 @@
             });
         }
 
+        // WebSocket connection established
         ws.onopen = function() {
-            ws.send(JSON.stringify({ action: "get_flag" }));
+            ws.send(JSON.stringify({ action: "get_flag" })); // Requests sameDimensions flag
             wsStatus = "connected_not_running";
             updateIndicator();
         };
 
+        // Handles incoming WebSocket messages
         ws.onmessage = function(event) {
             const data = JSON.parse(event.data);
             if (data.flag === "sameDimensions") {
-                sameDimensionsFlag = data.value;
+                sameDimensionsFlag = data.value; // Sets flag from server
             } else if (data.action === "load_response") {
                 const loadedNetworks = data.data;
                 networks = [];
@@ -2299,7 +1801,7 @@
                     wsStatus = "connected_running";
                     updateIndicator();
                     if (data.cell_states) {
-                        applyCellStates(data.cell_states);
+                        applyCellStates(data.cell_states); // Updates cell states during runtime
                     }
                 } else if (data.status === "not_running") {
                     wsStatus = "connected_not_running";
@@ -2309,12 +1811,14 @@
             }
         };
 
+        // Handles WebSocket connection closure
         ws.onclose = function() {
             wsStatus = "disconnected";
             updateIndicator();
             setAllCellsDefault();
         };
 
+        // Handles WebSocket errors
         ws.onerror = function() {
             wsStatus = "disconnected";
             updateIndicator();
