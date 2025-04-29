@@ -339,25 +339,25 @@ Project URL: https://github.com/hiperiondev/ladder-editor
         }
         @keyframes backgroundBlink {
             0% { background-color: #fff; }
-            50% { background-color: #ffcccc; } /* Light red at peak */
+            50% { background-color: lightgray; } /* Light red at peak */
             100% { background-color: #fff; }
         }
         @keyframes strokeBlink {
-            0% { stroke: green; }
-            50% { stroke: red; }
-            100% { stroke: green; }
+            0% { stroke: gray; }
+            50% { stroke: black; }
+            100% { stroke: gray; }
         }
         @keyframes fillBlink {
-            0% { fill: green; }
-            50% { fill: red; }
-            100% { fill: green; }
+            0% { fill: gray; }
+            50% { fill: black; }
+            100% { fill: gray; }
         }
         tr.blinking td {
             animation: rowBlink 1s infinite; /* Blinks entire row */
         }
         @keyframes rowBlink {
             0% { background-color: #fff; }
-            50% { background-color: #ffcccc; }
+            50% { background-color: lightgray; }
             100% { background-color: #fff; }
         }
 
@@ -411,61 +411,61 @@ Project URL: https://github.com/hiperiondev/ladder-editor
             "NOP": { // No Operation symbol
                 cells: 1,              // Occupies 1 cell
                 dataEntries: [],       // No data required
-                svg: `<svg viewBox="0 0 60 60"><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NOP</text></svg>`,
+                svg: `<svg viewBox="0 0 60 60"><rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="gray">NOP</text></svg>`,
                 pins: [{ left: false, right: false }] // No connections
             },
             "CONN": { // Connection line symbol
                 cells: 1,
                 dataEntries: [],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }] // Connects left and right
             },
             "NEG": { // Negation symbol
                 cells: 1,
                 dataEntries: [{ name: "value1", allowedTypes: ["NONE"] }],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NEG</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">NEG</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "NO": { // Normally Open contact
                 cells: 1,
                 dataEntries: [{ name: "value1", allowedTypes: ["I", "Q", "D", "T", "C", "IW", "K", "QW"] }],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="gray" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "NC": { // Normally Closed contact
                 cells: 1,
                 dataEntries: [{ name: "value1", allowedTypes: ["I", "Q", "D", "T", "C", "IW", "K", "QW"] }],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="40" x2="40" y2="20" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="gray" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2"/><line x1="20" y1="40" x2="40" y2="20" stroke="gray" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "RE": { // Rising Edge contact
                 cells: 1,
                 dataEntries: [{ name: "value1", allowedTypes: ["I", "Q", "D", "T", "C", "IW", "K", "QW"] }],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="30" y="35" font-size="12" text-anchor="middle" fill="green">P</text></svg>`,
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="gray" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2"/><text x="30" y="35" font-size="12" text-anchor="middle" fill="gray">P</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "FE": { // Falling Edge contact
                 cells: 1,
                 dataEntries: [{ name: "value1", allowedTypes: ["I", "Q", "D", "T", "C", "IW", "K", "QW"] }],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="green" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="30" y="35" font-size="12" text-anchor="middle" fill="green">N</text></svg>`,
+                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="gray" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2"/><text x="30" y="35" font-size="12" text-anchor="middle" fill="gray">N</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "COIL": { // Standard coil
                 cells: 1,
                 dataEntries: [{ name: "value1", allowedTypes: ["M", "Q"] }],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg3" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs3" /> <line x1="0" y1="30" x2="20.790773" y2="30" stroke="#808080" stroke-width="2" id="line1" /> <text x="20" y="35" font-size="16" fill="gray" id="text1">(</text> <text x="35" y="35" font-size="16" fill="gray" id="text3">)</text> <line x1="38.945633" y1="30" x2="60" y2="30" stroke="#808080" stroke-width="2" id="line3" /></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "COILL": { // Latch (Set) coil
                 cells: 1,
                 dataEntries: [{ name: "value1", allowedTypes: ["M", "Q"] }],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="27" y="35" font-size="12" text-anchor="middle" fill="green">S</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg3" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs3" /> <line x1="0" y1="30" x2="20.790773" y2="30" stroke="#808080" stroke-width="2" id="line1" /> <text x="20" y="35" font-size="16" fill="gray" id="text1">(</text> <text x="30.077431" y="34.868206" font-size="12px" text-anchor="middle" fill="#808080" id="text2">L</text> <text x="35" y="35" font-size="16" fill="gray" id="text3">)</text> <line x1="38.945633" y1="30" x2="60" y2="30" stroke="#808080" stroke-width="2" id="line3" /></svg`,
                 pins: [{ left: true, right: true }]
             },
             "COILU": { // Unlatch (Reset) coil
                 cells: 1,
                 dataEntries: [{ name: "value1", allowedTypes: ["M", "Q"] }],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="green" stroke-width="2"/><text x="20" y="35" font-size="16" fill="green">(</text><text x="27" y="35" font-size="12" text-anchor="middle" fill="green">R</text><text x="35" y="35" font-size="16" fill="green">)</text><line x1="40" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg3" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs3" /> <line x1="0" y1="30" x2="20.790773" y2="30" stroke="#808080" stroke-width="2" id="line1" /> <text x="20" y="35" font-size="16" fill="gray" id="text1">(</text> <text x="30.077431" y="34.868206" font-size="12px" text-anchor="middle" fill="#808080" id="text2">U</text> <text x="35" y="35" font-size="16" fill="gray" id="text3">)</text> <line x1="38.945633" y1="30" x2="60" y2="30" stroke="#808080" stroke-width="2" id="line3" /></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "TON": { // On-Delay Timer
@@ -474,7 +474,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["T"] },
                     { name: "value2", allowedTypes: ["MS", "10MS", "100MS", "SEC", "MIN"] }
                 ],
-                svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TON</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/>< text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 120" version="1.1" id="svg4" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs4" /> <rect x="10" y="10" width="40" height="100" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <text x="13" y="40" font-size="10px" fill="#808080" id="text2">IN</text> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line2" /> <text x="34.472816" y="39.736408" font-size="10px" fill="#808080" id="text3">Q0</text> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line3" /> <text x="35.395386" y="99.868202" font-size="10px" fill="#808080" id="text4">Q1</text> <line x1="50" y1="90.527176" x2="60" y2="90.527176" stroke="#808080" stroke-width="2" id="line4" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.658978" y="10.868204" /> <text x="30.049425" y="23.522242" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">TON</text></svg>`,
                 pins: [
                     { left: true, right: true },
                     { left: false, right: true }
@@ -486,7 +486,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["T"] },
                     { name: "value2", allowedTypes: ["MS", "10MS", "100MS", "SEC", "MIN"] }
                 ],
-                svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TOF</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 120" version="1.1" id="svg4" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs4" /> <rect x="10" y="10" width="40" height="100" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <text x="13" y="40" font-size="10px" fill="#808080" id="text2">IN</text> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line2" /> <text x="34.472816" y="39.736408" font-size="10px" fill="#808080" id="text3">Q0</text> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line3" /> <text x="35.395386" y="99.868202" font-size="10px" fill="#808080" id="text4">Q1</text> <line x1="50" y1="90.527176" x2="60" y2="90.527176" stroke="#808080" stroke-width="2" id="line4" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.658978" y="10.868204" /> <text x="30.049425" y="23.522242" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">TOF</text></svg>`,
                 pins: [
                     { left: true, right: true },
                     { left: false, right: true }
@@ -498,7 +498,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["T"] },
                     { name: "value2", allowedTypes: ["MS", "10MS", "100MS", "SEC", "MIN"] }
                 ],
-                svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TP</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 120" version="1.1" id="svg4" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs4" /> <rect x="10" y="10" width="40" height="100" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <text x="13" y="40" font-size="10px" fill="#808080" id="text2">IN</text> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line2" /> <text x="34.472816" y="39.736408" font-size="10px" fill="#808080" id="text3">Q0</text> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line3" /> <text x="35.395386" y="99.868202" font-size="10px" fill="#808080" id="text4">Q1</text> <line x1="50" y1="90.527176" x2="60" y2="90.527176" stroke="#808080" stroke-width="2" id="line4" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.658978" y="10.868204" /> <text x="30.049425" y="23.522242" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">TP</text></svg>`,
                 pins: [
                     { left: true, right: true },
                     { left: false, right: true }
@@ -510,10 +510,10 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["C"] },
                     { name: "value2", allowedTypes: ["NONE"] }
                 ],
-                svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">CTU</text><text x="15" y="40" font-size="10" fill="green">CU</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="15" y="100" font-size="10" fill="green">R</text><line x1="0" y1="90" x2="10" y2="90" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 120" version="1.1" id="svg5" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs5" /> <rect x="10" y="10" width="40" height="100" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <text x="13" y="40" font-size="10px" fill="#808080" id="text2">CU</text> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line2" /> <text x="34.341022" y="39.868206" font-size="10px" fill="#808080" id="text4">Q0</text> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line4" /> <text x="35" y="100" font-size="10" fill="gray" id="text5">Q1</text> <line x1="50" y1="90.263588" x2="60" y2="90.263588" stroke="#808080" stroke-width="2" id="line5" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.672158" y="10.876442" /> <text x="30.062603" y="23.530479" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">CTU</text></svg>`,
                 pins: [
                     { left: true, right: true },
-                    { left: true, right: true }
+                    { left: false, right: true }
                 ]
             },
             "CTD": { // Down Counter
@@ -522,19 +522,19 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["C"] },
                     { name: "value2", allowedTypes: ["NONE"] }
                 ],
-                svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">CTD</text><text x="15" y="40" font-size="10" fill="green">CD</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="15" y="100" font-size="10" fill="green">R</text><line x1="0" y1="90" x2="10" y2="90" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 120" version="1.1" id="svg5" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs5" /> <rect x="10" y="10" width="40" height="100" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <text x="13" y="40" font-size="10px" fill="#808080" id="text2">CU</text> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line2" /> <text x="34.341022" y="39.868206" font-size="10px" fill="#808080" id="text4">Q0</text> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line4" /> <text x="35" y="100" font-size="10" fill="gray" id="text5">Q1</text> <line x1="50" y1="90.263588" x2="60" y2="90.263588" stroke="#808080" stroke-width="2" id="line5" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.672158" y="10.876442" /> <text x="30.062603" y="23.530479" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">CTD</text></svg>`,
                 pins: [
                     { left: true, right: true },
-                    { left: true, right: true }
+                    { left: false, right: true }
                 ]
             },
-            "MOVE": { // Move operation
+            "MOV": { // Move operation
                 cells: 1,
                 dataEntries: [
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MOVE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">MOV</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "SUB": { // Subtraction operation
@@ -544,7 +544,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 180"><rect x="10" y="10" width="40" height="160" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SUB</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/><text x="35" y="160" font-size="10" fill="green">Q2</text><line x1="50" y1="150" x2="60" y2="150" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 180" version="1.1" id="svg5" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs5" /> <rect x="10" y="10" width="40" height="160" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <text x="13.023065" y="40" font-size="10px" fill="#808080" id="text2">IN</text> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line2" /> <text x="33.790775" y="40" font-size="10px" fill="#808080" id="text3">Q0</text> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line3" /> <text x="35" y="100" font-size="10" fill="gray" id="text4">Q1</text> <line x1="50.197693" y1="90.593079" x2="60.197693" y2="90.593079" stroke="#808080" stroke-width="2" id="line4" /> <text x="35" y="160" font-size="10" fill="gray" id="text5">Q2</text> <line x1="50" y1="151.18616" x2="60" y2="151.18616" stroke="#808080" stroke-width="2" id="line5" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.403625" y="10.835256" /> <text x="29.794073" y="23.489292" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000"><tspan style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:sans-serif" id="tspan5">SUB</tspan></text></svg>`,
                 pins: [
                     { left: true, right: true },
                     { left: false, right: true },
@@ -558,7 +558,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ADD</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">ADD</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "MUL": { // Multiplication operation
@@ -568,7 +568,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MUL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">MUL</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "DIV": { // Division operation
@@ -578,7 +578,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 120"><rect x="10" y="10" width="40" height="100" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">DIV</text><text x="15" y="40" font-size="10" fill="green">IN</text><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><text x="35" y="40" font-size="10" fill="green">Q0</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/><text x="35" y="100" font-size="10" fill="green">Q1</text><line x1="50" y1="90" x2="60" y2="90" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 120" version="1.1" id="svg4" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs4" /> <rect x="10" y="10" width="40" height="100" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <text x="13" y="40" font-size="10px" fill="#808080" id="text2">IN</text> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line2" /> <text x="34.472816" y="40" font-size="10px" fill="#808080" id="text3">Q0</text> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line3" /> <text x="35" y="100" font-size="10" fill="gray" id="text4">Q1</text> <line x1="50" y1="90.527176" x2="60" y2="90.527176" stroke="#808080" stroke-width="2" id="line4" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.851729" y="10.906096" /> <text x="30.242176" y="23.560133" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">DIV</text></svg>`,
                 pins: [
                     { left: true, right: true },
                     { left: false, right: true }
@@ -591,7 +591,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">MOD</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">MOD</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "SHL": { // Shift Left operation
@@ -600,7 +600,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SHL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">SHL</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "SHR": { // Shift Right operation
@@ -609,7 +609,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">SHR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">SHL</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "ROL": { // Rotate Left operation
@@ -618,7 +618,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ROL</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">ROL</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "ROR": { // Rotate Right operation
@@ -627,7 +627,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">ROR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">ROR</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "AND": { // Logical AND operation
@@ -637,7 +637,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">AND</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">AND</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "OR": { // Logical OR operation
@@ -647,7 +647,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">OR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">OR</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "XOR": { // Logical XOR operation
@@ -657,7 +657,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">XOR</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">XOR</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "NOT": { // Logical NOT operation
@@ -666,7 +666,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NOT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">NOT</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "EQ": { // Equal comparison
@@ -675,7 +675,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">EQ</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">EQ</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "GT": { // Greater Than comparison
@@ -684,7 +684,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">GT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">GT</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "GE": { // Greater or Equal comparison
@@ -693,7 +693,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">GE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">GE</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "LT": { // Less Than comparison
@@ -702,7 +702,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">LT</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">LT</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "LE": { // Less or Equal comparison
@@ -711,7 +711,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">LE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">LE</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "NE": { // Not Equal comparison
@@ -720,17 +720,17 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">NE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">NE</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
-            "TMOVE": { // Table Move operation
+            "TMOV": { // Table Move operation
                 cells: 1,
                 dataEntries: [
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="10" y2="30" stroke="green" stroke-width="2"/><rect x="10" y="10" width="40" height="40" fill="none" stroke="green" stroke-width="2"/><text x="30" y="25" font-size="12" text-anchor="middle" fill="green">TMOVE</text><line x1="50" y1="30" x2="60" y2="30" stroke="green" stroke-width="2"/></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">TMOV</text></svg>`,
                 pins: [{ left: true, right: true }]
             }
         };
@@ -1042,7 +1042,7 @@ Project URL: https://github.com/hiperiondev/ladder-editor
                                 line.setAttribute('y1', '0');
                                 line.setAttribute('x2', '1');
                                 line.setAttribute('y2', cellSize.toString());
-                                line.setAttribute('stroke', 'green');
+                                line.setAttribute('stroke', 'gray');
                                 line.setAttribute('stroke-width', '2');
                                 barSvg.appendChild(line);
                                 barDiv.appendChild(barSvg);
