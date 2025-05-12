@@ -1267,7 +1267,7 @@
             currentMenu = menu;
         }
 
-        // Shows the data type menu on right-click
+        // Shows the data type menu on right-click with the modification
         function showDataTypeMenu(event) {
             event.preventDefault();
             event.stopPropagation();
@@ -1304,9 +1304,11 @@
 
                 let typeSelect = null;
                 if (entry.allowedTypes.length === 1) {
-                    const typeText = document.createElement('span');
-                    typeText.textContent = entry.allowedTypes[0];
-                    pairDiv.appendChild(typeText);
+                    if (entry.allowedTypes[0] !== "NONE") {
+                        const typeText = document.createElement('span');
+                        typeText.textContent = entry.allowedTypes[0];
+                        pairDiv.appendChild(typeText);
+                    }
                 } else {
                     typeSelect = document.createElement('select');
                     entry.allowedTypes.forEach(type => {
