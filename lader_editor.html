@@ -1,28 +1,3 @@
-<!--
- Copyright 2025 Emiliano Gonzalez (egonzalez . hiperion @ gmail . com))
- Project Site: https://github.com/hiperiondev/ladder-editor
- 
- The MIT License (MIT)
- 
-   Permission is hereby granted, free of charge, to any person obtaining
-   a copy of this software and associated documentation files (the
-   "Software"), to deal in the Software without restriction, including
-   without limitation the rights to use, copy, modify, merge, publish,
-   distribute, sublicense, and/or sell copies of the Software, and to
-   permit persons to whom the Software is furnished to do so, subject to
-   the following conditions:
-  
-   The above copyright notice and this permission notice shall be
-   included in all copies or substantial portions of the Software.
-  
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-   LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -79,13 +54,13 @@
 
         /* Styles the grid table representing a ladder logic network */
         .network-table {
-            border-collapse: collapse;      /* Removes gaps between cells */
-            background-color: #fff;         /* White background for the grid */
-            box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Subtle shadow for depth */
-            margin-left: var(--label-width);/* Offset for row labels */
+            border-collapse: collapse;                       /* Removes gaps between cells */
+            background-color: #fff;                          /* White background for the grid */
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);            /* Subtle shadow for depth */
+            margin-left: var(--label-width);                 /* Offset for row labels */
             margin-top: calc(var(--controls-height) + 20px); /* Space for controls */
-            margin-bottom: 40px;            /* Extra space below the table */
-            border: 1px solid #ddd;         /* Light border around the table */
+            margin-bottom: 40px;                             /* Extra space below the table */
+            border: 1px solid #ddd;                          /* Light border around the table */
         }
 
         /* Styles individual cells in the network table */
@@ -120,7 +95,7 @@
 
         /* Styles for SVGs spanning multiple cells (e.g., timers) */
         .multi-cell-svg {
-            position: absolute; /* Positions SVG over multiple rows */
+            position: absolute;      /* Positions SVG over multiple rows */
             top: 0;
             left: 0;
             width: var(--cell-size); /* Matches cell width */
@@ -137,10 +112,10 @@
 
         /* Specific styles for row labels (left of the grid) */
         .row-label {
-            width: var(--label-width); /* Fixed width from CSS variable */
-            text-align: right;         /* Right-aligned text */
+            width: var(--label-width);   /* Fixed width from CSS variable */
+            text-align: right;           /* Right-aligned text */
             left: 0;
-            padding-right: 6px;        /* Space between label and grid */
+            padding-right: 6px;          /* Space between label and grid */
             top: calc(var(--controls-height) + 20px + var(--row-index) * var(--cell-size) + (var(--cell-size) / 2)); /* Positions based on row index */
             transform: translateY(-50%); /* Vertically centers the label */
         }
@@ -164,9 +139,9 @@
 
         /* Styles the table inside the symbol values container */
         #symbolValues table {
-            width: 100%;          /* Full width of the container */
+            width: 100%;               /* Full width of the container */
             border-collapse: collapse; /* Removes gaps between cells */
-            margin-top: 10px;     /* Space above the table */
+            margin-top: 10px;          /* Space above the table */
         }
 
         /* Styles table headers and cells in symbol values table */
@@ -200,14 +175,14 @@
 
         /* Styles for the symbol and data type context menus */
         #symbolMenu, #dataTypeMenu {
-            position: absolute;       /* Positions at click location */
-            background-color: #fff;   /* White background */
-            border: 1px solid #ccc;   /* Light border */
+            position: absolute;     /* Positions at click location */
+            background-color: #fff; /* White background */
+            border: 1px solid #ccc; /* Light border */
             box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Shadow for depth */
-            z-index: 1000;            /* Ensures menu appears above other elements */
-            padding: 5px;             /* Internal padding */
-            display: none;            /* Hidden by default */
-            min-width: 150px;         /* Minimum width for readability */
+            z-index: 1000;          /* Ensures menu appears above other elements */
+            padding: 5px;           /* Internal padding */
+            display: none;          /* Hidden by default */
+            min-width: 150px;       /* Minimum width for readability */
         }
 
         /* Styles for items within the menus */
@@ -278,13 +253,13 @@
 
         /* Label displaying the network number */
         .network-label {
-            position: absolute; /* Positioned above controls */
-            top: -20px;         /* Offset above the wrapper */
+            position: absolute;      /* Positioned above controls */
+            top: -20px;              /* Offset above the wrapper */
             left: 0;
-            font-weight: bold;  /* Bold text */
-            width: 150px;       /* Fixed width */
-            white-space: nowrap;/* Prevents wrapping */
-            overflow: hidden;   /* Hides overflow */
+            font-weight: bold;       /* Bold text */
+            width: 150px;            /* Fixed width */
+            white-space: nowrap;     /* Prevents wrapping */
+            overflow: hidden;        /* Hides overflow */
             text-overflow: ellipsis; /* Adds ellipsis for long text */
         }
 
@@ -443,57 +418,71 @@
             },
             "NEG": { // Negation symbol
                 cells: 1,
-                dataEntries: [{ name: "value1", allowedTypes: ["NONE"] }],
+                dataEntries: [],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">NEG</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "NO": { // Normally Open contact
                 cells: 1,
-                dataEntries: [{ name: "value1", allowedTypes: ["I", "Q", "M", "D", "T", "C", "IW", "K", "QW"] }],
+                dataEntries: [
+                    { name: "value", allowedTypes: ["I", "Q", "M", "D", "T", "C", "IW", "K", "QW"] }
+                ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="gray" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "NC": { // Normally Closed contact
                 cells: 1,
-                dataEntries: [{ name: "value1", allowedTypes: ["I", "Q", "M", "D", "T", "C", "IW", "K", "QW"] }],
+                dataEntries: [
+                    { name: "value", allowedTypes: ["I", "Q", "M", "D", "T", "C", "IW", "K", "QW"] }
+                ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="gray" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2"/><line x1="20" y1="40" x2="40" y2="20" stroke="gray" stroke-width="2"/></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "RE": { // Rising Edge contact
                 cells: 1,
-                dataEntries: [{ name: "value1", allowedTypes: ["I", "Q", "M", "D", "T", "C", "IW", "K", "QW"] }],
+                dataEntries: [
+                    { name: "value", allowedTypes: ["I", "Q", "M", "D", "T", "C", "IW", "K", "QW"] }
+                ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="gray" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2"/><text x="30" y="35" font-size="12" text-anchor="middle" fill="gray">P</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "FE": { // Falling Edge contact
                 cells: 1,
-                dataEntries: [{ name: "value1", allowedTypes: ["I", "Q", "M", "D", "T", "C", "IW", "K", "QW"] }],
+                dataEntries: [
+                    { name: "value", allowedTypes: ["I", "Q", "M", "D", "T", "C", "IW", "K", "QW"] }
+                ],
                 svg: `<svg viewBox="0 0 60 60"><line x1="0" y1="30" x2="20" y2="30" stroke="gray" stroke-width="2"/><line x1="20" y1="20" x2="20" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="20" x2="40" y2="40" stroke="gray" stroke-width="2"/><line x1="40" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2"/><text x="30" y="35" font-size="12" text-anchor="middle" fill="gray">N</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "COIL": { // Standard coil
                 cells: 1,
-                dataEntries: [{ name: "value1", allowedTypes: ["M", "Q"] }],
+                dataEntries: [
+                    { name: "value", allowedTypes: ["M", "Q"] }
+                ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg3" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs3" /> <line x1="0" y1="30" x2="20.790773" y2="30" stroke="#808080" stroke-width="2" id="line1" /> <text x="20" y="35" font-size="16" fill="gray" id="text1">(</text> <text x="35" y="35" font-size="16" fill="gray" id="text3">)</text> <line x1="38.945633" y1="30" x2="60" y2="30" stroke="#808080" stroke-width="2" id="line3" /></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "COILL": { // Latch (Set) coil
                 cells: 1,
-                dataEntries: [{ name: "value1", allowedTypes: ["M", "Q"] }],
+                dataEntries: [
+                    { name: "value", allowedTypes: ["M", "Q"] }
+                ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg3" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs3" /> <line x1="0" y1="30" x2="20.790773" y2="30" stroke="#808080" stroke-width="2" id="line1" /> <text x="20" y="35" font-size="16" fill="gray" id="text1">(</text> <text x="30.077431" y="34.868206" font-size="12px" text-anchor="middle" fill="#808080" id="text2">L</text> <text x="35" y="35" font-size="16" fill="gray" id="text3">)</text> <line x1="38.945633" y1="30" x2="60" y2="30" stroke="#808080" stroke-width="2" id="line3" /></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "COILU": { // Unlatch (Reset) coil
                 cells: 1,
-                dataEntries: [{ name: "value1", allowedTypes: ["M", "Q"] }],
+                dataEntries: [
+                    { name: "value", allowedTypes: ["M", "Q"] }
+                ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg3" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs3" /> <line x1="0" y1="30" x2="20.790773" y2="30" stroke="#808080" stroke-width="2" id="line1" /> <text x="20" y="35" font-size="16" fill="gray" id="text1">(</text> <text x="30.077431" y="34.868206" font-size="12px" text-anchor="middle" fill="#808080" id="text2">U</text> <text x="35" y="35" font-size="16" fill="gray" id="text3">)</text> <line x1="38.945633" y1="30" x2="60" y2="30" stroke="#808080" stroke-width="2" id="line3" /></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "TON": { // On-Delay Timer
                 cells: 2,
                 dataEntries: [
-                    { name: "value1", allowedTypes: ["T"] },
-                    { name: "value2", allowedTypes: ["MS", "10MS", "100MS", "SEC", "MIN"] }
+                    { name: "timer", allowedTypes: ["T"] },
+                    { name: "basetime", allowedTypes: ["MS", "10MS", "100MS", "SEC", "MIN"] }
                 ],
                 svg: `<svg viewBox="0 0 60 120" version="1.1" id="svg4" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs4" /> <rect x="10" y="10" width="40" height="100" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <text x="13" y="40" font-size="10px" fill="#808080" id="text2">IN</text> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line2" /> <text x="34.472816" y="39.736408" font-size="10px" fill="#808080" id="text3">Q0</text> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line3" /> <text x="35.395386" y="99.868202" font-size="10px" fill="#808080" id="text4">Q1</text> <line x1="50" y1="90.527176" x2="60" y2="90.527176" stroke="#808080" stroke-width="2" id="line4" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.658978" y="10.868204" /> <text x="30.049425" y="23.522242" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">TON</text></svg>`,
                 pins: [
@@ -504,8 +493,8 @@
             "TOF": { // Off-Delay Timer
                 cells: 2,
                 dataEntries: [
-                    { name: "value1", allowedTypes: ["T"] },
-                    { name: "value2", allowedTypes: ["MS", "10MS", "100MS", "SEC", "MIN"] }
+                    { name: "timer", allowedTypes: ["T"] },
+                    { name: "basetime", allowedTypes: ["MS", "10MS", "100MS", "SEC", "MIN"] }
                 ],
                 svg: `<svg viewBox="0 0 60 120" version="1.1" id="svg4" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs4" /> <rect x="10" y="10" width="40" height="100" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <text x="13" y="40" font-size="10px" fill="#808080" id="text2">IN</text> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line2" /> <text x="34.472816" y="39.736408" font-size="10px" fill="#808080" id="text3">Q0</text> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line3" /> <text x="35.395386" y="99.868202" font-size="10px" fill="#808080" id="text4">Q1</text> <line x1="50" y1="90.527176" x2="60" y2="90.527176" stroke="#808080" stroke-width="2" id="line4" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.658978" y="10.868204" /> <text x="30.049425" y="23.522242" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">TOF</text></svg>`,
                 pins: [
@@ -516,8 +505,8 @@
             "TP": { // Pulse Timer
                 cells: 2,
                 dataEntries: [
-                    { name: "value1", allowedTypes: ["T"] },
-                    { name: "value2", allowedTypes: ["MS", "10MS", "100MS", "SEC", "MIN"] }
+                    { name: "timer", allowedTypes: ["T"] },
+                    { name: "basetime", allowedTypes: ["MS", "10MS", "100MS", "SEC", "MIN"] }
                 ],
                 svg: `<svg viewBox="0 0 60 120" version="1.1" id="svg4" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs4" /> <rect x="10" y="10" width="40" height="100" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <text x="13" y="40" font-size="10px" fill="#808080" id="text2">IN</text> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line2" /> <text x="34.472816" y="39.736408" font-size="10px" fill="#808080" id="text3">Q0</text> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line3" /> <text x="35.395386" y="99.868202" font-size="10px" fill="#808080" id="text4">Q1</text> <line x1="50" y1="90.527176" x2="60" y2="90.527176" stroke="#808080" stroke-width="2" id="line4" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.658978" y="10.868204" /> <text x="30.049425" y="23.522242" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">TP</text></svg>`,
                 pins: [
@@ -528,8 +517,8 @@
             "CTU": { // Up Counter
                 cells: 2,
                 dataEntries: [
-                    { name: "value1", allowedTypes: ["C"] },
-                    { name: "value2", allowedTypes: ["NONE"] }
+                    { name: "counter", allowedTypes: ["C"] },
+                    { name: "preset value", allowedTypes: ["NONE"] }
                 ],
                 svg: `<svg viewBox="0 0 60 120" version="1.1" id="svg5" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs5" /> <rect x="10" y="10" width="40" height="100" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <text x="13" y="40" font-size="10px" fill="#808080" id="text2">CU</text> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line2" /> <text x="34.341022" y="39.868206" font-size="10px" fill="#808080" id="text4">Q0</text> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line4" /> <text x="35" y="100" font-size="10" fill="gray" id="text5">Q1</text> <line x1="50" y1="90.263588" x2="60" y2="90.263588" stroke="#808080" stroke-width="2" id="line5" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.672158" y="10.876442" /> <text x="30.062603" y="23.530479" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">CTU</text></svg>`,
                 pins: [
@@ -540,8 +529,8 @@
             "CTD": { // Down Counter
                 cells: 2,
                 dataEntries: [
-                    { name: "value1", allowedTypes: ["C"] },
-                    { name: "value2", allowedTypes: ["NONE"] }
+                    { name: "counter", allowedTypes: ["C"] },
+                    { name: "preset value", allowedTypes: ["NONE"] }
                 ],
                 svg: `<svg viewBox="0 0 60 120" version="1.1" id="svg5" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs5" /> <rect x="10" y="10" width="40" height="100" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <text x="13" y="40" font-size="10px" fill="#808080" id="text2">CU</text> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line2" /> <text x="34.341022" y="39.868206" font-size="10px" fill="#808080" id="text4">Q0</text> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line4" /> <text x="35" y="100" font-size="10" fill="gray" id="text5">Q1</text> <line x1="50" y1="90.263588" x2="60" y2="90.263588" stroke="#808080" stroke-width="2" id="line5" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.672158" y="10.876442" /> <text x="30.062603" y="23.530479" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">CTD</text></svg>`,
                 pins: [
@@ -552,8 +541,8 @@
             "MOV": { // Move operation
                 cells: 1,
                 dataEntries: [
-                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "from", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "to", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">MOV</text></svg>`,
                 pins: [{ left: true, right: true }]
@@ -563,7 +552,7 @@
                 dataEntries: [
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "result", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 180" version="1.1" id="svg5" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs5" /> <rect x="10" y="10" width="40" height="160" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <text x="13.023065" y="40" font-size="10px" fill="#808080" id="text2">IN</text> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line2" /> <text x="33.790775" y="40" font-size="10px" fill="#808080" id="text3">Q0</text> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line3" /> <text x="35" y="100" font-size="10" fill="gray" id="text4">Q1</text> <line x1="50.197693" y1="90.593079" x2="60.197693" y2="90.593079" stroke="#808080" stroke-width="2" id="line4" /> <text x="35" y="160" font-size="10" fill="gray" id="text5">Q2</text> <line x1="50" y1="151.18616" x2="60" y2="151.18616" stroke="#808080" stroke-width="2" id="line5" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.403625" y="10.835256" /> <text x="29.794073" y="23.489292" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000"><tspan style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:sans-serif" id="tspan5">SUB</tspan></text></svg>`,
                 pins: [
@@ -577,7 +566,7 @@
                 dataEntries: [
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "result", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">ADD</text></svg>`,
                 pins: [{ left: true, right: true }]
@@ -587,7 +576,7 @@
                 dataEntries: [
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "result", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">MUL</text></svg>`,
                 pins: [{ left: true, right: true }]
@@ -597,7 +586,7 @@
                 dataEntries: [
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "result", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 120" version="1.1" id="svg4" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs4" /> <rect x="10" y="10" width="40" height="100" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <text x="13" y="40" font-size="10px" fill="#808080" id="text2">IN</text> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line2" /> <text x="34.472816" y="40" font-size="10px" fill="#808080" id="text3">Q0</text> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line3" /> <text x="35" y="100" font-size="10" fill="gray" id="text4">Q1</text> <line x1="50" y1="90.527176" x2="60" y2="90.527176" stroke="#808080" stroke-width="2" id="line4" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.851729" y="10.906096" /> <text x="30.242176" y="23.560133" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">DIV</text></svg>`,
                 pins: [
@@ -610,7 +599,7 @@
                 dataEntries: [
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "result", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">MOD</text></svg>`,
                 pins: [{ left: true, right: true }]
@@ -618,8 +607,8 @@
             "SHL": { // Shift Left operation
                 cells: 1,
                 dataEntries: [
-                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "value", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "result", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">SHL</text></svg>`,
                 pins: [{ left: true, right: true }]
@@ -627,17 +616,17 @@
             "SHR": { // Shift Right operation
                 cells: 1,
                 dataEntries: [
-                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "value", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "result", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
-                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">SHL</text></svg>`,
+                svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">SHR</text></svg>`,
                 pins: [{ left: true, right: true }]
             },
             "ROL": { // Rotate Left operation
                 cells: 1,
                 dataEntries: [
-                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "value", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "result", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">ROL</text></svg>`,
                 pins: [{ left: true, right: true }]
@@ -645,8 +634,8 @@
             "ROR": { // Rotate Right operation
                 cells: 1,
                 dataEntries: [
-                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "value", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "result", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">ROR</text></svg>`,
                 pins: [{ left: true, right: true }]
@@ -656,7 +645,7 @@
                 dataEntries: [
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "result", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">AND</text></svg>`,
                 pins: [{ left: true, right: true }]
@@ -666,7 +655,7 @@
                 dataEntries: [
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "result", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">OR</text></svg>`,
                 pins: [{ left: true, right: true }]
@@ -676,7 +665,7 @@
                 dataEntries: [
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "result", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">XOR</text></svg>`,
                 pins: [{ left: true, right: true }]
@@ -684,8 +673,8 @@
             "NOT": { // Logical NOT operation
                 cells: 1,
                 dataEntries: [
-                    { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "value", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
+                    { name: "result", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">NOT</text></svg>`,
                 pins: [{ left: true, right: true }]
@@ -749,7 +738,7 @@
                 dataEntries: [
                     { name: "value1", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
                     { name: "value2", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] },
-                    { name: "value3", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
+                    { name: "to", allowedTypes: ["D", "T", "C", "IW", "K", "QW"] }
                 ],
                 svg: `<svg viewBox="0 0 60 60" version="1.1" id="svg2" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"> <defs id="defs2" /> <line x1="0" y1="30" x2="10" y2="30" stroke="gray" stroke-width="2" id="line1" /> <rect x="10" y="10" width="40" height="40" fill="none" stroke="gray" stroke-width="2" id="rect1" /> <line x1="50" y1="30" x2="60" y2="30" stroke="gray" stroke-width="2" id="line2" /> <rect style="opacity:0.363002;fill:#999999" id="rect4" width="38.484348" height="17.133444" x="10.822076" y="11.023065" /> <text x="30.212521" y="23.677101" font-size="12px" text-anchor="middle" fill="gray" id="text1" style="fill:#000000">TMOV</text></svg>`,
                 pins: [{ left: true, right: true }]
@@ -762,11 +751,14 @@
             return /^\d+$/.test(str) && !isNaN(num) && num >= 0 && num <= 4294967295;
         }
 
-        // Validates Q or I type values (e.g., "1.2.3" format)
+        // Validates Q or I type values (format "m.p" where m and p are 0-255)
         function isValidQorI(value) {
             const parts = value.split('.');
-            if (parts.length < 1 || parts.length > 3) return false;
-            return parts.every(part => isValidUInt32(part));
+            if (parts.length !== 2) return false;
+            return parts.every(part => {
+                const num = parseInt(part, 10);
+                return /^\d+$/.test(part) && !isNaN(num) && num >= 0 && num <= 255;
+            });
         }
 
         // Validates real number format (e.g., "1.23", "-4.5e2")
@@ -809,6 +801,21 @@
                     return isValidReal(value);
                 default:
                     return false;
+            }
+        }
+
+        // Returns the default value based on data type
+        function getDefaultValue(type) {
+            switch (type) {
+                case "Q":
+                case "I":
+                    return "0.0";
+                case "CSTR":
+                    return "";
+                case "REAL":
+                    return "0.0";
+                default:
+                    return "0";
             }
         }
 
@@ -1273,9 +1280,12 @@
             const menu = document.getElementById('dataTypeMenu');
             menu.innerHTML = '';
 
-            if (network.networkData[row][col].symbol === "NOP" || network.networkData[row][col].symbol === 'occupied') return;
+            const cellSymbol = network.networkData[row][col].symbol;
+            if (cellSymbol === 'occupied' || !symbols[cellSymbol] || symbols[cellSymbol].dataEntries.length === 0) {
+                return;
+            }
 
-            const symbol = symbols[network.networkData[row][col].symbol];
+            const symbol = symbols[cellSymbol];
             const dataEntries = symbol.dataEntries;
             const inputs = [];
 
@@ -1307,11 +1317,15 @@
                         typeSelect.appendChild(option);
                     });
                     pairDiv.appendChild(typeSelect);
+                    typeSelect.onchange = function() {
+                        const newType = typeSelect.value;
+                        input.value = getDefaultValue(newType);
+                    };
                 }
 
                 const input = document.createElement('input');
                 input.type = 'text';
-                input.value = network.networkData[row][col].data[i]?.value || '0';
+                input.value = network.networkData[row][col].data[i].value;
                 pairDiv.appendChild(input);
                 valueDiv.appendChild(pairDiv);
                 menu.appendChild(valueDiv);
@@ -1399,7 +1413,7 @@
                         network.networkData[row + i][col].data = symbol.dataEntries.map(entry => ({
                             name: entry.name,
                             type: entry.allowedTypes[0],
-                            value: '0'
+                            value: getDefaultValue(entry.allowedTypes[0])
                         }));
                     } else {
                         network.networkData[row + i][col].data = [];
@@ -1550,10 +1564,11 @@
                         const newData = [];
                         expectedDataEntries.forEach(entry => {
                             const loadedEntry = cell.data.find(d => d.name === entry.name && typeof d.type === 'string' && typeof d.value === 'string');
-                            if (loadedEntry && entry.allowedTypes.includes(loadedEntry.type)) {
+                            if (loadedEntry && entry.allowedTypes.includes(loadedEntry.type) && validateValue(loadedEntry.type, loadedEntry.value)) {
                                 newData.push({ name: entry.name, type: loadedEntry.type, value: loadedEntry.value });
                             } else {
-                                newData.push({ name: entry.name, type: entry.allowedTypes[0], value: '0' });
+                                const defaultType = entry.allowedTypes[0];
+                                newData.push({ name: entry.name, type: defaultType, value: getDefaultValue(defaultType) });
                             }
                         });
                         cell.data = newData;
