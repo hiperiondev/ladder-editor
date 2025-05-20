@@ -177,3 +177,307 @@ The following functions are central to WebSocket integration:
 | `resizeNetwork`         | Resizes one or all networks based on `sameDimensionsFlag`.                   |
 | `applyCellStates`       | Updates cell highlights based on server-provided state updates.              |
 | `validateNetworkData`   | Ensures loaded data is valid, correcting symbols and data entries.           |
+
+# WebSocket Communication in Ladder Editor
+
+## WebSocket Connection Lifecycle
+
+1. **Connection Establishment**:
+   - The client establishes a WebSocket connection to `ws://localhost:8080`.
+   - Upon connection, the client sends a `{ action: "get_flag" }` message to request the "sameDimensions" flag.
+   - The connection status is tracked as "disconnected", "connected_not_running", or "connected_running", with a visual indicator (red, yellow, green).
+
+2. **Message Handling**:
+   - The client processes incoming messages to update flags, load networks, or apply cell states during simulation.
+
+3. **Connection Closure**:
+   - On connection close or error, the client sets the status to "disconnected", updates the indicator to red, and resets all cells to their default state.
+
+## Client to Server Messages
+
+### 1. Get Flag
+Sent when the WebSocket connection opens to request the "sameDimensions" flag, which likely indicates if the server expects networks with consistent dimensions.
+
+**JSON Structure**:
+```json
+{
+  "action": "get_flag"
+}
+```
+
+### 2. Save Networks
+Sent to save the current network configurations to the server. The `data` field contains an array of network objects.
+
+**JSON Structure**:
+```json
+{
+  "action": "save",
+  "data": [network objects]
+}
+```
+
+**Example**:
+```json
+{
+  "action": "save",
+  "data": [
+    {
+      "id": 0,
+      "rows": 2,
+      "cols": 2,
+      "networkData": [
+        [
+          {
+            "symbol": "NO",
+            "bar": false,
+            "data": [
+              {
+                "name": "value",
+                "type": "I",
+                "value": "0.0"
+              }
+            ]
+          },
+          {
+            "symbol": "CONN",
+            "bar": false,
+            "data": []
+          }
+        ],
+        [
+          {
+            "symbol": "NOP",
+            "bar": true,
+            "data": []
+          },
+          {
+            "symbol": "Q",
+            "bar": false,
+            "data": [
+              {
+                "name": "value",
+                "type": "Q",
+                "value": "0.0"
+              }
+            ]
+          }
+        ]
+      ]
+    }
+  ]
+}
+```
+
+### 3. Load Networks
+Sent to request network configurations from the server.
+
+**JSON Structure**:
+```json
+{
+  "action": "load"
+}
+```
+
+## Server to Client Messages
+
+### 1. Flag Response
+Response to the "get_flag" action, providing the value of the "sameDimensions" flag.
+
+**JSON Structure**:
+```json
+{
+  "flag": "sameDimensions",
+  "value": boolean
+}
+```
+
+**Example**:
+```json
+{
+  "flag": "sameDimensions",
+  "value": true
+}
+```
+
+### 2. Load Response
+Response to the "load" action, providing an array of network objects. The structure mirrors the save message's `data` field.
+
+**JSON Structure**:
+```json
+{
+  "action": "load_response",
+  "data": [network objects]
+}
+```
+
+**Example**:
+```json
+{
+  "action": "load_response",
+  "data": [
+    {
+      "id": 0,
+      "rows": 2,
+      "cols": 2,
+      "networkData": [
+        [
+          {
+            "symbol": "NO",
+            "bar": false,
+            "data": [
+              {
+                "name": "value",
+                "type": "I",
+                "value": "0.0"
+              }
+            ]
+          },
+          {
+            "symbol": "CONN",
+            "bar": false,
+            "data": []
+          }
+        ],
+        [
+          {
+            "symbol": "NOP",
+            "bar": true,
+            "data": []
+          },
+          {
+            "symbol": "Q",
+            "bar": false,
+            "data": [
+              {
+                "name": "value",
+                "type": "Q",
+                "value": "0.0"
+              }
+            ]
+          }
+        ]
+      ]
+    }
+  ]
+}
+```
+
+### 3. Status Updates
+The server sends status updates to indicate whether the simulation is running or not.
+
+#### Running Status
+When the simulation is running, the server sends cell state updates to reflect the active/inactive status of cells.
+
+**JSON Structure**:
+```json
+{
+  "status": "running",
+  "cell_states": [
+    {
+      "networkId": number,
+      "row": number,
+      "col": number,
+      "state": number
+    },
+    ...
+  ]
+}
+```
+
+**Example**:
+```json
+{
+  "status": "running",
+  "cell_states": [
+    {
+      "networkId": 0,
+      "row": 0,
+      "col": 0,
+      "state": 1
+    },
+    {
+      "networkId": 0,
+      "row": 0,
+      "col": 1,
+      "state": 0
+    },
+    {
+      "networkId": 0,
+      "row": 1,
+      "col": 0,
+      "state": 0
+    },
+    {
+      "networkId": 0,
+      "row": 1,
+      "col": 1,
+      "state": 1
+    }
+  ]
+}
+```
+
+#### Not Running Status
+When the simulation is not running, the server sends a simple status message.
+
+**JSON Structure**:
+```json
+{
+  "status": "not_running"
+}
+```
+
+## Data Structures
+
+### Network Object
+Represents a single network in the ladder logic editor.
+
+| Field         | Type       | Description                                      |
+|---------------|------------|--------------------------------------------------|
+| `id`          | Number     | Unique identifier for the network.               |
+| `rows`        | Number     | Number of rows (default 8, max 100).             |
+| `cols`        | Number     | Number of columns (default 8, max 100).          |
+| `networkData` | Array      | 2D array of cell objects representing the grid.  |
+
+Each cell in `networkData` is an object with:
+
+| Field    | Type       | Description                                      |
+|----------|------------|--------------------------------------------------|
+| `symbol` | String     | Symbol type (e.g., "NOP", "CONN", "NO", "Q").    |
+| `bar`    | Boolean    | Indicates presence of a vertical bar.            |
+| `data`   | Array      | Array of data entries for the symbol.            |
+
+Each data entry in `data` is an object with:
+
+| Field    | Type       | Description                                      |
+|----------|------------|--------------------------------------------------|
+| `name`   | String     | Name of the data entry (e.g., "value").          |
+| `type`   | String     | Data type (e.g., "I", "Q", "M").                 |
+| `value`  | String     | Value of the data entry (e.g., "0.0").           |
+
+### Cell State
+Represents the state of a cell during simulation.
+
+| Field       | Type       | Description                                      |
+|-------------|------------|--------------------------------------------------|
+| `networkId` | Number     | Identifier of the network.                       |
+| `row`       | Number     | Row index of the cell.                           |
+| `col`       | Number     | Column index of the cell.                        |
+| `state`     | Number     | State of the cell (e.g., 1 for active, 0 for inactive). |
+
+## Supported Symbols and Data Types
+The editor supports various ladder logic symbols, each with specific data entry requirements. Examples include:
+
+| Symbol | Cells | Data Entries (Name, Allowed Types)         | Pins (Left, Right)       |
+|--------|-------|--------------------------------------------|--------------------------|
+| `NOP`  | 1     | []                                         | [false, false]           |
+| `CONN` | 1     | []                                         | [true, true]             |
+| `NO`   | 1     | [value, I,Q,M,D,T,C,IW,K,QW]               | [true, true]             |
+| `Q`    | 1     | [value, Q]                                 | [true, true]             |
+
+Supported data types include: NONE, M, Q, I, Cd, Cr, Td, Tr, IW, QW, C, T, D, CSTR, REAL, MS, 10MS, 100MS, SEC, MIN, K.
+
+## Additional Notes
+- The client validates network data before sending, ensuring `rows` and `cols` are within limits (max 100) and data entries match allowed types.
+- The server controls the simulation state, sending "running" or "not_running" updates without explicit client requests to start/stop.
+- The maximum number of networks is 10, and file uploads for loading networks are limited to 10MB.
