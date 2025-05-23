@@ -21,7 +21,7 @@ The code was created entirely with AI, so I don't consider it my own creation an
 
 ## WebSocket Integration Overview
 
-The editor connects to a server at `ws://localhost:8080` using WebSockets, facilitating real-time data exchange for program persistence and simulation. Key functionalities include:
+The editor connects to a server at `ws://<IP>/ws` when <IP> is from webeditor was loaded, using WebSockets, facilitating real-time data exchange for program persistence and simulation. Key functionalities include:
 
 - **Saving and Loading Programs**: Store and retrieve ladder logic configurations via the server or locally as JSON files.
 - **Uniform Network Dimensions**: Ensure all networks maintain consistent sizes based on a server flag.
@@ -32,7 +32,7 @@ Below, we explore each feature, detailing their implementation and interaction w
 
 ## WebSocket Connection and Status Management
 
-The editor establishes a WebSocket connection upon loading, managed through a `WebSocket` object (`ws = new WebSocket("ws://localhost:8080")`). The connection status is tracked via the `wsStatus` variable, which can be:
+The connection status is tracked via the `wsStatus` variable, which can be:
 
 - **Disconnected**: No connection to the server (`wsStatus = "disconnected"`).
 - **Connected, Not Running**: Connected, but the server is not simulating (`wsStatus = "connected_not_running"`).
@@ -183,7 +183,7 @@ The following functions are central to WebSocket integration:
 ## WebSocket Connection Lifecycle
 
 1. **Connection Establishment**:
-   - The client establishes a WebSocket connection to `ws://localhost:8080`.
+   - The client establishes a WebSocket connection.
    - Upon connection, the client sends a `{ action: "get_flag" }` message to request the "sameDimensions" flag.
    - The connection status is tracked as "disconnected", "connected_not_running", or "connected_running", with a visual indicator (red, yellow, green).
 
