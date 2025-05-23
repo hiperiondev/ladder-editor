@@ -407,6 +407,8 @@
         <button onclick="redo()">Redo</button>
         <!-- WebSocket connection status indicator -->
         <div id="ws-indicator" style="display: inline-block; width: 20px; height: 20px; border-radius: 50%; background-color: red; margin-left: 10px;"></div>
+        <!-- Start/Stop button -->
+        <button id="start-stop-button" style="background-color: green; margin-left: 10px;">Start</button>
     </div>
 
     <!-- Container where all network diagrams are dynamically added -->
@@ -1794,6 +1796,32 @@
         };
 
         // WebSocket setup for real-time communication with server
+        const startStopButton = document.getElementById('start-stop-button');
+        let isRunning = false;
+
+        startStopButton.addEventListener('click', () => {
+        if (isRunning) {
+                // Stop
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ action: "stop" }));
+                } else {
+                    console.log("WebSocket is not connected.");
+                }
+                startStopButton.textContent = "Start";
+                startStopButton.style.backgroundColor = "green";
+            } else {
+                // Start
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ action: "start" }));
+                } else {
+                    console.log("WebSocket is not connected.");
+                }
+                startStopButton.textContent = "Stop";
+                startStopButton.style.backgroundColor = "red";
+            }
+            isRunning = !isRunning;
+        });
+
         const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
         const host = location.host;
         const wsUrl = `${protocol}//${host}/ws`;
