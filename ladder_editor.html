@@ -1794,9 +1794,12 @@
         };
 
         // WebSocket setup for real-time communication with server
-        const ws = new WebSocket("ws://localhost:8080");
+        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const host = location.host;
+        const wsUrl = `${protocol}//${host}/ws`;
+        const ws = new WebSocket(wsUrl);
+        
         let wsStatus = "disconnected"; // Tracks WebSocket connection state
-
         // Updates the WebSocket status indicator color
         function updateIndicator() {
             const indicator = document.getElementById('ws-indicator');
@@ -1806,6 +1809,8 @@
                 indicator.style.backgroundColor = "yellow";
             } else if (wsStatus === "connected_running") {
                 indicator.style.backgroundColor = "green";
+            } else if (wsStatus === "receiving") {
+                indicator.style.backgroundColor = "blue";
             }
         }
 
@@ -1840,6 +1845,7 @@
             if (data.flag === "sameDimensions") {
                 sameDimensionsFlag = data.value; // Sets flag from server
             } else if (data.action === "load_response") {
+                showToast("Load response");
                 const loadedNetworks = data.data;
                 networks = [];
                 document.getElementById('networks-container').innerHTML = '';
@@ -1857,6 +1863,8 @@
                 renderSymbolValues();
                 saveToHistory();
                 showToast("Loaded from server.");
+                wsStatus === wsStatus_old
+                updateIndicator();
             } else if (data.status) {
                 if (data.status === "running") {
                     wsStatus = "connected_running";
